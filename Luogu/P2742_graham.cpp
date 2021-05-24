@@ -9,10 +9,9 @@ typedef double db;
 const int maxn = 1e5 + 5;
 const db eps = 1e-7;
 
-il int dcmp(db a, db b)
+il int dcmp(db x)
 {
-    if (fabs(a - b) < eps) return 0;
-    else return a < b ? 1 : -1;
+    return fabs(x) < eps ? 0 : (x < 0 ? -1 : 1);
 }
 
 struct Point
@@ -24,8 +23,8 @@ struct Point
 
 il bool cmp(Point a, Point b)
 {
-    if (dcmp(a.p, b.p)) return a.p < b.p;
-    else if (dcmp(a.y, b.y)) return a.y < b.y;
+    if (dcmp(a.p - b.p)) return a.p < b.p;
+    else if (dcmp(a.y - b.y)) return a.y < b.y;
     else return a.x < b.x;
 }
 
@@ -48,16 +47,15 @@ int main()
         db x, y;
         scanf("%lf %lf", &x, &y);
         p[i] = Point(x, y);
-        if (y < p[O].y || (!dcmp(y, p[O].y) && x < p[O].x)) O = i;
+        if (y < p[O].y || (!dcmp(y - p[O].y) && x < p[O].x)) O = i;
     }
     p[O].p = -1;
     FOR(i, 1, n) if (i != O) p[i].p = atan2(p[i].y - p[O].y, p[i].x - p[O].x);
     std::sort(p + 1, p + n + 1, cmp);
-    stk[++top] = 1, stk[++top] = 2;
     p[n + 1] = p[1];
-    FOR(i, 3, n + 1)
+    FOR(i, 1, n + 1)
     {
-        while (top >= 1 && (getVec(p[stk[top - 1]], p[stk[top]]) ^ getVec(p[stk[top - 1]], p[i])) < 0)
+        while (top >= 2 && (getVec(p[stk[top - 1]], p[stk[top]]) ^ getVec(p[stk[top - 1]], p[i])) < 0)
             --top;
         stk[++top] = i;
     }
