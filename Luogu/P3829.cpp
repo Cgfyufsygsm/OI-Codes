@@ -73,4 +73,5 @@ int main()
             P[(i - 1) * 4 + j + 1] = Point(Point(x, y) + Rotate(R[j], theta));
     }
     printf("%.2lf\n", andrew() + 2 * pi * r);
+    return 0;
 }
