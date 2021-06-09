@@ -26,7 +26,7 @@ inline int max(int a,int b)
 const int maxn=16000+5;
 int n,w[maxn];
 std::vector<int> G[maxn];
-int f[maxn][2],fa[maxn],ans;
+int f[maxn][2],fa[maxn],ans = -2e9;
 
 void dfs(int u,int father)
 {
