@@ -5,8 +5,7 @@
 
 const int maxn = 1e5 + 5;
 
-int read()
-{
+int read() {
     int s = 0, x = 0;
     char c = getchar();
     while (!isdigit(c))
@@ -16,5 +15,4 @@ int read()
     return x ? -s : s;
 }
 
-int main()
-{}
+int main() {}
