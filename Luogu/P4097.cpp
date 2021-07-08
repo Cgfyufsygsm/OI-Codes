@@ -4,13 +4,11 @@
 #define FOR(i, a, b) for (int i = a; i <= b; ++i)
 #define DEC(i, a, b) for (int i = a; i >= b; --i)
 
-namespace fastIO
-{
+namespace fastIO {
     const int maxc = 1e7 + 5;
     char buf[maxc], *p1 = buf, *p2 = buf;
     il char getchar() {return p1 == p2 && (p2 = (p1 = buf) + fread(buf, 1, maxc, stdin), p1 == p2) ? EOF : *p1++;}
-    int read()
-    {
+    int read() {
         int s = 0, x = 0;
         char c = getchar();
         while (!isdigit(c))
@@ -28,8 +26,7 @@ const int maxn = 1e5 + 5, mod1 = 39989, mod2 = 1e9;
 
 int cnt = 0;
 
-struct segment
-{
+struct segment {
     db k, b;
 } p[maxn];
 
@@ -37,15 +34,13 @@ int t[mod1 << 2];
 
 il db calc(int i, int x) {return p[i].k * x + p[i].b;}
 il int max(int a, int b) {return a > b ? a : b;}
-template<typename T> il void swap(T &a, T &b)
-{
+template<typename T> il void swap(T &a, T &b) {
     T t = a;
     a = b, b = t;
     return;
 }
 
-void add(int x0, int y0, int x1, int y1)
-{
+void add(int x0, int y0, int x1, int y1) {
     ++cnt;
     if (x0 == x1)
         p[cnt].k = 0, p[cnt].b = max(y0, y1);
@@ -58,37 +53,25 @@ void add(int x0, int y0, int x1, int y1)
 #define R (L | 1)
 #define M ((i + j) >> 1)
 
-void update(int k, int i, int j, int x, int y, int u)// u 为线段编号
-{
+void update(int k, int i, int j, int x, int y, int u) {
     if (x > j || y < i) return;
     int v = t[k];
     db resu = calc(u, M), resv = calc(v, M);
-    if (x <= i && y >= j)
-    {
-        if (i == j)
-        {
-            if (resu > resv) t[k] = u;
+    if (x <= i && y >= j) {
+        if (calc(u, i) >= calc(v, i) && calc(u, j) >= calc(v, j)) {
+            t[k] = u;
             return;
         }
-        if (p[u].k > p[v].k)
-        {
+        if (calc(u, i) <= calc(v, i) && calc(u, j) <= calc(v, j)) return;
+        if (p[u].k > p[v].k) {
             if (resu > resv)
-            {
-                t[k] = u;
-                update(L, i, M, x, y, v);
-            }
+                t[k] = u, update(L, i, M, x, y, v);
             else update(R, M + 1, j, x, y, u);
-        }
-        else if (p[u].k < p[v].k)
-        {
+        } else if (p[u].k < p[v].k) {
             if (resu > resv)
-            {
-                t[k] = u;
-                update(R, M + 1, j, x, y, v);
-            }
+                t[k] = u, update(R, M + 1, j, x, y, v);
             else update(L, i, M, x, y, u);
         }
-        else if (p[u].b > p[v].b) t[k] = u;
         return;
     }
     update(L, i, M, x, y, u);
@@ -98,8 +81,7 @@ void update(int k, int i, int j, int x, int y, int u)// u 为线段编号
 
 il int cmp(int X, int i, int j) {return calc(i, X) > calc(j, X) ? i : j;}
 
-int query(int X, int k, int i, int j)
-{
+int query(int X, int k, int i, int j) {
     if (i > j) return 0;
     int ret = cmp(X, 0, t[k]);
     if (i == j) return ret;
@@ -108,19 +90,14 @@ int query(int X, int k, int i, int j)
     return ret;
 }
 
-int main()
-{
+int main() {
     int n = read(), last = 0;
-    FOR(i, 1, n)
-    {
+    FOR(i, 1, n) {
         int op = read();
-        if (!op)
-        {
+        if (!op) {
             int k = (read() + last - 1) % mod1 + 1;
             printf("%d\n", last = query(k, 1, 1, mod1));
-        }
-        else
-        {
+        } else {
             int x0 = (read() + last - 1) % mod1 + 1, y0 = (read() + last - 1) % mod2 + 1;
             int x1 = (read() + last - 1) % mod1 + 1, y1 = (read() + last - 1) % mod2 + 1;
             if (x0 > x1) swap(x0, x1), swap(y0, y1);
