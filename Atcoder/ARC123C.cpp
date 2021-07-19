@@ -20,7 +20,7 @@ int solve() {
                 if (f[i][j][k]) {
                     FOR(l, max((j + 2) / 3, k), min(j, a[i + 1] - '0'))
                         f[i + 1][a[i + 1] - '0'][l] = 1;
-                    FOR(l, max((i + 1) / 3, k), min(j - 1, a[i + 1] - '0' + 10))
+                    FOR(l, max((j + 1) / 3, k), min(j - 1, a[i + 1] - '0' + 10))
                         f[i + 1][a[i + 1] - '0' + 10][l] = 1;
                 }
             }
