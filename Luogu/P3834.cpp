@@ -6,8 +6,7 @@
 
 const int maxn = 2e5 + 5, maxm = 8e6;
 
-int read()
-{
+int read() {
     int s = 0, x = 0;
     char c = getchar();
     while (!isdigit(c))
@@ -19,8 +18,7 @@ int read()
 
 int n, a[maxn], b[maxn], tot;
 
-struct node
-{
+struct node {
     int ls, rs, sum;
 } t[maxm];
 
@@ -30,25 +28,14 @@ int cnt, root[maxn];
 #define R(k) t[k].rs
 #define M ((i + j) >> 1)
 
-void build(int &k, int i, int j)
-{
-    k = ++cnt;
-    if (i != j)
-        build(L(k), i, M), build(R(k), M + 1, j);
-    return;
-}
-
-inline int clone(int k)
-{
+inline int clone(int k) {
     t[++cnt] = t[k];
     return cnt;
 }
 
-int insert(int k, int i, int j, int x)
-{
+int insert(int k, int i, int j, int x) {
     k = clone(k);
-    if (i == j)
-    {
+    if (i == j)     {
         ++t[k].sum;
         return k;
     }
@@ -58,25 +45,21 @@ int insert(int k, int i, int j, int x)
     return k;
 }
 
-int query(int k1, int k2, int i, int j, int k)
-{
+int query(int k1, int k2, int i, int j, int k) {
     if (i >= j) return i;
     int x = t[L(k2)].sum - t[L(k1)].sum;
     if (x >= k) return query(L(k1), L(k2), i, M, k);
     else return query(R(k1), R(k2), M + 1, j, k - x);
 }
 
-int main()
-{
+int main() {
     n = read();
     int m = read();
     FOR(i, 1, n) a[i] = b[i] = read();
     std::sort(b + 1, b + n + 1);
     tot = std::unique(b + 1, b + n + 1) - b - 1;
-    build(root[0], 1, tot);
     FOR(i, 1, n) root[i] = insert(root[i - 1], 1, tot, std::lower_bound(b + 1, b + tot + 1, a[i]) - b);
-    while (m--)
-    {
+    while (m--)     {
         int l = read(), r = read(), k = read();
         printf("%d\n", b[query(root[l - 1], root[r], 1, tot, k)]);
     }

@@ -25,26 +25,32 @@ typedef long long ll;
 const int maxn = 1e6 + 5;
 
 int n;
-ll x[maxn], v[maxn], p[maxn], c[maxn];
+ll x[maxn], v[maxn], psum[maxn], c[maxn], p[maxn];
 ll f[maxn];
 // f[i] = min(f[j] + c[i] + )
-il ll X(int i) {return p[i];}
+il ll X(int i) {return psum[i];}
 il ll Y(int i) {return f[i] + v[i];}
+il ll min(ll a, ll b) {return a < b ? a : b;}
 
 int q[maxn], head, tail;
 
 int main() {
     n = read();
     FOR(i, 1, n) x[i] = read(), p[i] = read(), c[i] = read();
-    FOR(i, 1, n) v[i] = v[i - 1] + x[i] * p[i], p[i] += p[i - 1];
+    FOR(i, 1, n) v[i] = v[i - 1] + x[i] * p[i], psum[i] = p[i] + psum[i - 1];
     q[head = tail = 1] = 0;
     FOR(i, 1, n) {
         while (head < tail && (Y(q[head + 1]) - Y(q[head])) < x[i] * (X(q[head + 1]) - X(q[head]))) ++head;
         int &j = q[head];
-        f[i] = f[j] + x[i] * (p[i] - p[j]) + v[j] - v[i] + c[i];
+        f[i] = f[j] + x[i] * (psum[i] - psum[j]) + v[j] - v[i] + c[i];
         while (head < tail && (Y(q[tail]) - Y(q[tail - 1])) * (X(i) - X(q[tail])) >= (Y(i) - Y(q[tail])) * (X(q[tail]) - X(q[tail - 1]))) --tail;
         q[++tail] = i;
     }
-    printf("%lld\n", f[n]);
+    ll ans = f[n];
+    DEC(i, n, 1) {
+        ans = min(f[i], ans);
+        if (p[i]) break;
+    }
+    printf("%lld\n", ans);
     return 0;
 }
