@@ -5,7 +5,7 @@
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 
 namespace fastIO {
-    const int maxc = 1 << 21;
+    const int maxc = 1 << 23;
     char ibuf[maxc], *__p1 = ibuf, *__p2 = ibuf;
     il char getchar() {return __p1 == __p2 && (__p2 = (__p1 = ibuf) + fread(ibuf, 1, maxc, stdin), __p1 == __p2) ? EOF : *__p1++;}
     template<typename T> void read(T &n) {
