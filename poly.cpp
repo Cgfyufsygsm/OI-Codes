@@ -173,22 +173,20 @@ namespace poly {
         return ret;
     }
 
-    void polySqrt(const Poly &A, Poly &B, int n) {
-        if (!n) return;
-        if (n == 1) B.push_back(1);
-        else if (n & 1) {
-            polySqrt(A, B, --n);
-            int sav = 0;
-            FOR(i, 1, n - 1) sav = (sav + 1ll * B[i] * B[n - i] % mod) % mod;
-            B.push_back(1ll * (A[n] + mod - sav) * ((mod + 1) / 2) % mod);
-        } else {
-            polySqrt(A, B, n >> 1);
-            Poly invB = 2 * B, sA;
-            invB.resize(n); invB = polyInv(invB);
-            sA.resize(n); cpy(&sA[0], &A[0], n);
-            sA = sA * invB; sA.resize(n);
-            B = qPow(2) * B + sA;
+    Poly polyPow(const Poly &f, int k) {
+        return polyExp(k * polyLn(f));
+    }
+
+    void polySqrt(const Poly &A, Poly &B, int m) {
+        if (m == 1) {
+            B.push_back(1);
+            return;
         }
+        polySqrt(A, B, (m + 1) >> 1);
+        B.resize(m);
+        Poly invB = polyInv(2 * B), sA(A.begin(), A.begin() + m);
+        B = qPow(2) * B + invB * sA;
+        return;
     }
     
     Poly polySqrt(const Poly &A) {
