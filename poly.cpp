@@ -227,6 +227,78 @@ namespace poly {
         Poly one; one.push_back(1);
         return ints(deri(A) * polyInv(one + A * A));
     }
+
+#define L (k << 1)
+#define R (L | 1)
+#define M ((l + r) >> 1)
+    Poly g[maxn << 2], Q;
+
+    void initG(int k, int l, int r, int *a) {
+        if (l == r) {
+            g[k].push_back(a[l] ? mod - a[l] : 0);
+            g[k].push_back(1);
+            return;
+        }
+        initG(L, l, M, a);
+        initG(R, M + 1, r, a);
+        g[k] = g[L] * g[R];
+        return;
+    }
+
+    void evaluate(int k, int l, int r, Poly A, int *a, int *ans) {
+        if (r - l + 1 < 100) {
+            FOR(i, l, r) {
+                int s = 0;
+                DEC(j, A.size() - 1, 0)
+                    s = (1ll * s * a[i] % mod + A[j]) % mod;
+                ans[i] = s;
+            }
+            return;
+        }
+        Poly B;
+        polyDiv(A, g[L], Q, B);
+        evaluate(L, l, M, B, a, ans);
+        polyDiv(A, g[R], Q, B);
+        evaluate(R, M + 1, r, B, a, ans);
+        return;
+    }
+
+    void evaluate(Poly f, int m, int *a, int *ans) {
+        initG(1, 1, m, a);
+        evaluate(1, 1, m, f, a, ans);
+        return;
+    }
+
+    Poly delta[maxn << 2], ddelta;
+    int dval[maxn];
+
+    void initDelta(int k, int l, int r, int *x) {
+        if (l == r) {
+            delta[k].push_back(x[l] ? mod - x[l] : 0);
+            delta[k].push_back(1);
+            return;
+        }
+        initDelta(L, l, M, x);
+        initDelta(R, M + 1, r, x);
+        delta[k] = delta[L] * delta[R];
+        return;
+    }
+
+    Poly interpolation(int k, int l, int r, int *x, int *y) {
+        if (l == r)
+            return Poly(1, 1ll * y[l] * qPow(dval[l]) % mod);
+        return interpolation(L, l, M, x, y) * delta[R] + interpolation(R, M + 1, r, x, y) * delta[L];
+    }
+
+    Poly interpolation(int n, int *x, int *y) {
+        initDelta(1, 1, n, x);
+        ddelta = deri(delta[1]);
+        evaluate(ddelta, n, x, dval);
+        return interpolation(1, 1, n, x, y);
+    }
+#undef L
+#undef R
+#undef M
 #undef int
 } using namespace poly;
 
