@@ -10,6 +10,7 @@
 #define il inline
 #define clr(f, n) memset(f, 0, (sizeof(int)) * (n))
 #define cpy(f, g, n) memcpy(f, g, (sizeof(int)) * (n))
+#define NTT
 
 template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
 template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
@@ -17,7 +18,11 @@ template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
 typedef long long ll;
 typedef unsigned long long ull;
 
+#ifdef NTT
 const int mod = 998244353;
+#else
+int mod;
+#endif
 
 namespace polynomial {
 const int maxn = 1 << 17 | 500, imgunit = 86583718;
@@ -100,6 +105,9 @@ Poly operator-(const Poly &A) {
     return ret;
 }
 
+#ifdef NTT
+#undef NTT
+namespace NTT {
 const int G = 3, invG = qPow(G);
 
 void DFT(int *g, bool op, int n) {
@@ -142,6 +150,83 @@ Poly operator*(const Poly &A, const Poly &B) {
     clr(a, n), clr(b, n);
     return C;
 }
+} // namespace NTT
+using NTT::operator*;
+#else
+namespace MTT {
+typedef long double db;
+
+using std::sin;
+using std::cos;
+using std::acos;
+using std::floor;
+const db PI = acos(-1.0);
+const int DIV = 32768;
+
+namespace complex {
+struct Cmplx {
+    db x, y;
+    Cmplx(db xx = 0, db yy = 0) : x(xx), y(yy) {}
+};
+il Cmplx operator+(const Cmplx &a, const Cmplx &b) {return Cmplx(a.x + b.x, a.y + b.y);}
+il Cmplx operator-(const Cmplx &a, const Cmplx &b) {return Cmplx(a.x - b.x, a.y - b.y);}
+il Cmplx operator*(const Cmplx &a, const Cmplx &b) {return Cmplx(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);}
+} // namespace complex 
+
+using namespace complex;
+
+#define clr2(f, n) memset(f, 0, (sizeof(Cmplx)) * n)
+
+void DFT(Cmplx *g, int type, int lim) {
+    static Cmplx f[maxn << 1];
+    getTr(lim);
+    FOR(i, 0, lim - 1) f[i] = g[tr[i]];
+    for (int p = 2; p <= lim; p <<= 1) {
+        int len = p >> 1;
+        Cmplx Wp(std::cos(PI / len), type * std::sin(PI / len));
+        for (int k = 0; k < lim; k += p) {
+            Cmplx w(1, 0);
+            for (int l = k; l < k + len; ++l, w = w * Wp) {
+                Cmplx tmp = w * f[len + l];
+                f[len + l] = f[l] - tmp;
+                f[l] = f[l] + tmp;
+            }
+        }
+    }
+    FOR(i, 0, lim - 1)
+        if (type == -1) g[i] = Cmplx(f[i].x / lim, f[i].y / lim);
+        else g[i] = f[i];
+    return;
+}
+
+Poly operator*(Poly A, Poly B) {
+    static Cmplx p1[maxn << 1], p2[maxn << 1], q[maxn << 1], t1[maxn << 1], t2[maxn << 1];
+    VEC(i, A) p1[i] = Cmplx(A[i] / DIV, A[i] % DIV), p2[i] = Cmplx(A[i] / DIV, -p1[i].y);
+    VEC(i, B) q[i] = Cmplx(B[i] / DIV, B[i] % DIV);
+    Poly C; C.resize(min(lim, (int)A.size() + (int)B.size() - 1));
+    int n; for (n = 1; n < (int)(A.size() + B.size() - 1); n <<= 1);
+
+    DFT(p1, 1, n), DFT(p2, 1, n), DFT(q, 1, n);
+    FOR(i, 0, n - 1) t1[i] = p1[i] * q[i], t2[i] = p2[i] * q[i];
+    DFT(t1, -1, n), DFT(t2, -1, n);
+
+    VEC(i, C) {
+        ll a1b1, a1b2, a2b1, a2b2;
+        a1b1 = (ll)floor((t1[i].x + t2[i].x) / 2.0 + 0.49) % mod;
+        a1b2 = (ll)floor((t1[i].y + t2[i].y) / 2.0 + 0.49) % mod;
+        a2b1 = ((ll)floor(t1[i].y + 0.49) - a1b2) % mod;
+        a2b2 = ((ll)floor(t2[i].x + 0.49) - a1b1) % mod;
+        C[i] = ((((a1b1 << 15) + (a1b2 + a2b1)) << 15) + a2b2) % mod;
+        C[i] = (C[i] + mod) % mod;
+    }
+
+    clr2(p1, n), clr2(p2, n), clr2(q, n), clr2(t1, n), clr2(t2, n);
+    return C;
+}
+} // namespace MTT
+
+using MTT::operator*;
+#endif
 
 void polyInv(const Poly &A, Poly &B, int n) {
     if (!n) return;
@@ -251,6 +336,104 @@ void polyDiv(const Poly &A, const Poly &B, Poly &Q, Poly &R) {
     R = A - B * Q, R.resize(m - 1);
     return;
 }
+
+Poly polySin(const Poly &A) {
+    Poly tmp = polyExp(imgunit * A);
+    return qPow(1ll * 2 * imgunit % mod) * (tmp - polyInv(tmp));
+}
+
+Poly polyCos(const Poly &A) {
+    Poly tmp = polyExp(imgunit * A);
+    return qPow(2) * (tmp + polyInv(tmp));
+}
+
+Poly polyAsin(const Poly &A) {
+    Poly one; one.push_back(1);
+    return ints(deri(A) * polyInv(polySqrt(one - A * A)));
+}
+
+Poly polyAtan(const Poly &A) {
+    Poly one; one.push_back(1);
+    return ints(deri(A) * polyInv(one + A * A));
+}
+
+namespace multi_eval_and_interpolation
+{
+#define L (k << 1)
+#define R (L | 1)
+#define M ((l + r) >> 1)
+Poly g[maxn << 2], Q;
+
+void initG(int k, int l, int r, int *a) {
+    if (l == r) {
+        g[k].push_back(a[l] ? mod - a[l] : 0);
+        g[k].push_back(1);
+        return;
+    }
+    initG(L, l, M, a);
+    initG(R, M + 1, r, a);
+    g[k] = g[L] * g[R];
+    return;
+}
+
+void evaluate(int k, int l, int r, Poly A, int *a, int *ans) {
+    if (r - l + 1 < 100) {
+        FOR(i, l, r) {
+            int s = 0;
+            DEC(j, A.size() - 1, 0)
+                s = (1ll * s * a[i] % mod + A[j]) % mod;
+            ans[i] = s;
+        }
+        return;
+    }
+    Poly B;
+    polyDiv(A, g[L], Q, B);
+    evaluate(L, l, M, B, a, ans);
+    polyDiv(A, g[R], Q, B);
+    evaluate(R, M + 1, r, B, a, ans);
+    return;
+}
+
+void evaluate(Poly f, int m, int *a, int *ans) {
+    initG(1, 1, m, a);
+    evaluate(1, 1, m, f, a, ans);
+    return;
+}
+
+Poly delta[maxn << 2], ddelta;
+int dval[maxn];
+
+void initDelta(int k, int l, int r, int *x) {
+    if (l == r) {
+        delta[k].push_back(x[l] ? mod - x[l] : 0);
+        delta[k].push_back(1);
+        return;
+    }
+    initDelta(L, l, M, x);
+    initDelta(R, M + 1, r, x);
+    delta[k] = delta[L] * delta[R];
+    return;
+}
+
+Poly interpolation(int k, int l, int r, int *x, int *y) {
+    if (l == r)
+        return Poly(1, 1ll * y[l] * qPow(dval[l]) % mod);
+    return interpolation(L, l, M, x, y) * delta[R] + interpolation(R, M + 1, r, x, y) * delta[L];
+}
+
+Poly interpolation(int n, int *x, int *y) {
+    initDelta(1, 1, n, x);
+    ddelta = deri(delta[1]);
+    evaluate(ddelta, n, x, dval);
+    return interpolation(1, 1, n, x, y);
+}
+#undef L
+#undef R
+#undef M
+} // namespace multi_eval_and_interpolation
+
+using multi_eval_and_interpolation::evaluate;
+using multi_eval_and_interpolation::interpolation;
 } // namespace polynomial
 
 using namespace polynomial;
