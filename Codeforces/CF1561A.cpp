@@ -67,13 +67,8 @@ int main() {
         int p = 0;
         for (int i = 1; ; ++i) {
             if (check()) break;
-            if (i & 1) {
-                for (int j = 1; j <= n - 2; j += 2)
-                    f(j);
-            } else {
-                for (int j = 2; j <= n - 1; j += 2)
-                    f(j);
-            }
+            if (i & 1) for (int j = 1; j <= n - 2; j += 2) f(j);
+            else for (int j = 2; j <= n - 1; j += 2) f(j);
             p = i;
         }
         print(p), putchar('\n');

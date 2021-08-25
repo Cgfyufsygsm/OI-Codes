@@ -1,11 +1,8 @@
 #include <cstdio>
 #include <cctype>
-#include <vector>
-#include <algorithm>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
-#define VEC(i, v) for (int i = 0; i < (int)v.size(); ++i)
 
 namespace fastIO {
 const int maxc = 1 << 23;
@@ -42,41 +39,20 @@ void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
 
 using namespace fastIO;
 
-const int maxn = 2e5 + 5;
-int n;
+const int maxn = 4e6 + 5;
+int n, mod, f[maxn], d[maxn], sum[maxn];
 
-il int max(int a, int b) {return a > b ? a : b;}
-
-struct cave {
-    int need, size;
-    il bool operator<(const cave &b) {return need < b.need;}
-} a[maxn];
-
-bool check(int now) {
-    FOR(i, 1, n) {
-        if (now < a[i].need) return false;
-        now += a[i].size;
-    }
-    return true;
-}
+il int min(int a, int b) {return a < b ? a : b;}
 
 int main() {
-    int T; read(T);
-    while (T--) {
-        read(n);
-        FOR(i, 1, n) {
-            int tmp; read(a[i].size);
-            a[i].need = 0;
-            FOR(j, 1, a[i].size) read(tmp), a[i].need = max(a[i].need, tmp - j + 2);
-        }
-        std::sort(a + 1, a + n + 1);
-        int l = 1, r = 1e9 + 100, ret = 1e9;
-        while (l < r - 1) {
-            int mid = (l + r) >> 1;
-            if (check(mid)) ret = mid, r = mid;
-            else l = mid;
-        }
-        print(ret), putchar('\n');
+    read(n), read(mod);
+    FOR(i, 1, n) {
+        d[i] = (d[i - 1] + d[i]) % mod, f[i] = (sum[i - 1] + d[i]) % mod;
+        if (i == 1) f[i] = 1;
+        for (int j = 2; i * j <= n; ++j)
+            d[i * j] = (d[i * j] + f[i]) % mod, d[min((i + 1) * j, n + 1)] = (d[min((i + 1) * j, n + 1)] - f[i] + mod) % mod;
+        sum[i] = (sum[i - 1] + f[i]) % mod;
     }
+    printf("%d\n", f[n]);
     return output(), 0;
 }

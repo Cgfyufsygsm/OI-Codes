@@ -32,7 +32,7 @@ void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
 
 using namespace fastIO;
 
-const int maxn = 1e6 + 5;
+const int maxn = 2e5 + 5;
 int n, mod;
 int f[maxn], sum[maxn];
 
