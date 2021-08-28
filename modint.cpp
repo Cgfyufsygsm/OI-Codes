@@ -18,7 +18,7 @@ struct modint {
     modint(INT v = 0) : val(v) {check();}
 
     il modint &operator=(INT v) {return val = v, *this;}
-    il modint &operator+=(modint rhs) {return val = val + rhs.val > mod ? val + rhs.val - mod : val + rhs.val, *this;}
+    il modint &operator+=(modint rhs) {return val = val + rhs.val >= mod ? val + rhs.val - mod : val + rhs.val, *this;}
     il modint &operator-=(modint rhs) {return val = val - rhs.val < 0 ? val - rhs.val + mod : val - rhs.val, *this;}
     il modint &operator*=(modint rhs) {return val = 1ll * val * rhs.val % mod, *this;}
 
