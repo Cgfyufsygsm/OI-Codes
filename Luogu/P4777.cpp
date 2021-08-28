@@ -3,9 +3,9 @@
 #define il inline
 
 typedef long long ll;
+typedef long double ldb;
 
-inline ll read()
-{
+inline ll read() {
     char c = getchar();
     ll s = 0;
     bool x = 0;
@@ -16,10 +16,8 @@ inline ll read()
     return x ? -s : s;
 }
 
-ll exgcd(ll a, ll b, ll &x, ll &y)
-{
-    if (!b)
-    {
+ll exgcd(ll a, ll b, ll& x, ll& y) {
+    if (!b) {
         x = 1, y = 0;
         return a;
     }
@@ -28,29 +26,18 @@ ll exgcd(ll a, ll b, ll &x, ll &y)
     return tmp;
 }
 
-ll mul(ll a, ll b, ll mod)
-{
-    ll ans = 0, x = a;
-    b = (b + mod) % mod, a = (a + mod) % mod;
-    for (; b; b >>= 1ll)
-    {
-        if (b & 1ll)
-            ans = (ans + x) % mod;
-        x = (x << 1) % mod;
-    }
-    return ans;
+il ll mul(ll a, ll b, ll mod) {
+    return (a * b - (ll)((ldb)a / mod * b) * mod + mod) % mod;
 }
 
 const int maxn = 1e5 + 5;
 ll n, m[maxn], r[maxn];
 
-int main()
-{
+int main() {
     n = read();
     for (int i = 1; i <= n; ++i)
-        m[i]= read(), r[i] = read();
-    for (int i = 2; i <= n; ++i)
-    {
+        m[i] = read(), r[i] = read();
+    for (int i = 2; i <= n; ++i) {
         ll tmpx, tmpy;
         ll gcd = exgcd(m[i], m[i - 1], tmpx, tmpy);
         ll p1 = m[i - 1] / gcd, p2 = m[i] / gcd;

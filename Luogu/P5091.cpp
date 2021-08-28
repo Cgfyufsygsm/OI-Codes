@@ -3,14 +3,12 @@
 
 const int maxn = 20000000 + 5;
 
-int main()
-{
+int main() {
     int a, m, b = 0;
     scanf("%d %d", &a, &m);
     int phi = m, tmp = m;
     for (int i = 2; i * i <= tmp; ++i)
-        if (tmp % i == 0)
-        {
+        if (tmp % i == 0) {
             phi = phi / i * (i - 1);
             while (tmp % i == 0) tmp /= i;
         }
@@ -18,8 +16,7 @@ int main()
     int flag = 0;
     char c;
     while (!isdigit(c = getchar()));
-    for (; isdigit(c); c = getchar())
-    {
+    for (; isdigit(c); c = getchar()) {
         b = b * 10 + c - '0';
         if (b >= phi) flag = 1, b %= phi;
     }
