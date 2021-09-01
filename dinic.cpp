@@ -56,11 +56,15 @@ struct edge {
 int head[maxn], dep[maxn], cur[maxn], cnt = 1;
 int n, m, s, t;
 
-il void add(int u, int v, ll w) {
+il void add(int u, int v, int w) {
     e[++cnt].to = v;
     e[cnt].w = w;
     e[cnt].nxt = head[u];
     head[u] = cnt;
+    e[++cnt].to = u;
+    e[cnt].w = 0;
+    e[cnt].nxt = head[v];
+    head[v] = cnt;
     return;
 }
 
@@ -109,7 +113,7 @@ int main() {
     read(n), read(m), read(s), read(t);
     FOR(i, 1, m) {
         int u, v; ll w; read(u), read(v), read(w);
-        add(u, v, w), add(v, u, 0);
+        add(u, v, w);
     }
     print(dinic());
     return output(), 0;
