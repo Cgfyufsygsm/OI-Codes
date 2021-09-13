@@ -3,7 +3,6 @@
 #include <cmath>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
-#define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 
 namespace fastIO {
 const int maxc = 1 << 23;

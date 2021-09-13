@@ -2,7 +2,6 @@
 #include <cstring>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
-#define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 
 const int maxn = 105;
 char s1[maxn], s2[maxn];

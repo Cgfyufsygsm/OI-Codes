@@ -19,7 +19,6 @@ int las = 1, tot = 1, ans;
 int head[maxn << 1], to[maxn << 2], nxt[maxn << 2], cnte;
 
 void add(int u, int v) {
-    //printf("add %d %d\n", u, v);
     to[++cnte] = v;
     nxt[cnte] = head[u];
     head[u] = cnte;
@@ -28,7 +27,7 @@ void add(int u, int v) {
 
 void add(int c) {
     int cur = ++tot;
-    sam[cur].len = sam[las].len + 1, sam[cur].size = 1;
+    sam[cur].len = sam[las].len + 1;
     int p = las;
     while (p && !sam[p].ch[c]) sam[p].ch[c] = cur, p = sam[p].fa;
     if (!p) sam[cur].fa = 1;
@@ -39,7 +38,7 @@ void add(int c) {
         else {
             int clone = ++tot;
             sam[clone] = sam[q];
-            sam[clone].len = sam[p].len + 1, sam[clone].size = 0;
+            sam[clone].len = sam[p].len + 1;
             while (p && sam[p].ch[c] == q) sam[p].ch[c] = clone, p = sam[p].fa;
             sam[q].fa = sam[cur].fa = clone;
         }
@@ -62,6 +61,8 @@ void dfs(int u) {
 int main() {
     scanf("%s", s + 1), len = strlen(s + 1);
     FOR(i, 1, len) add(s[i] - 'a');
+    int p = 1;
+    FOR(i, 1, len) p = sam[p].ch[s[i] - 'a'], sam[p].size = 1;
     FOR(i, 2, tot) add(sam[i].fa, i);
     dfs(1);
     printf("%d\n", ans);
