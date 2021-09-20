@@ -1,8 +1,5 @@
 #include <cstdio>
 #include <cctype>
-#include <vector>
-#include <utility>
-#include <algorithm>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -42,26 +39,47 @@ void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
 
 using namespace fastIO;
 
+const int maxn = 2e5 + 5;
+
+int n, head[maxn], to[maxn << 1], nxt[maxn << 1], cnte, d[maxn], k;
+
+il void add(int u, int v) {
+    to[++cnte] = v;
+    nxt[cnte] = head[u];
+    head[u] = cnte;
+    return;
+}
+
+void dfs(int u, int fa) {
+    bool flag = 0;
+    for (int i = head[u]; i; i = nxt[i]) {
+        int v = to[i];
+        if (v == fa) continue;
+        dfs(v, u);
+        if (d[v] == 2) flag = 1;
+    }
+    if (fa) {
+        if (flag) ++k, d[u] = 3;
+        else d[u] = 2;
+    }
+    return;
+}
+
 int main() {
     int T; read(T);
     while (T--) {
-        int n, m;
-        read(n), read(m);
-        std::vector<std::pair<int, int> > a(n * m);
-        FOR(i, 0, n * m - 1) read(a[i].first), a[i].second = i;
-        std::sort(a.begin(), a.end());
-        FOR(i, 0, n * m - 1) a[i].second = -a[i].second;
-        int ans = 0;
-        FOR(i, 0, n - 1) {
-            std::sort(a.begin() + (m * i), a.begin() + (m * (i + 1)));
-            FOR(j, 0, m - 1) {
-                FOR(k, 0, j - 1) {
-                    if (a[m * i + k].second > a[m * i + j].second)
-                        ++ans;
-                }
-            }
+        read(n);
+        FOR(i, 1, n) head[i] = d[i] = 0;
+        k = 0;
+        FOR(i, 1, n - 1) {
+            int u, v; read(u), read(v);
+            add(u, v), add(v, u);
         }
-        print(ans), putchar('\n');
+        dfs(1, 0);
+        int s = 0;
+        for (int i = head[1]; i; i = nxt[i])
+            if (d[to[i]] == 2) {s = 1; break;}
+        print(n - 2 * k - s), putchar('\n');
     }
     return output(), 0;
 }

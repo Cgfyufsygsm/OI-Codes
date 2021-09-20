@@ -1,8 +1,6 @@
 #include <cstdio>
-#include <cstring>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
-#define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 
 const int maxn = 1e5 + 5;
 char s[maxn], t[maxn];
