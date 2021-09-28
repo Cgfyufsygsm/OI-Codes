@@ -269,6 +269,7 @@ Poly ints(const Poly &A) {
     for (int i = (int)C.size() - 1; i > 0; --i)
         C[i] = 1ll * C[i - 1] * inv[i] % mod;
     if (!C.empty()) C[0] = 0;
+    else C.push_back(0);
     return C;
 }
 
