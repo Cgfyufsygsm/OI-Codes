@@ -45,18 +45,16 @@ using namespace fastIO;
 template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
 template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
 
-typedef long long ll;
-const ll INF = 1e18;
+const int INF = 1e9;
 const int maxn = 5e3 + 5, maxm = 5e4 + 5;
 
 struct edge {
-    int to, nxt;
-    ll w, c;
+    int to, nxt, w, c;
 } e[maxm << 1];
 
 int head[maxn], cnt = 1, s, t;
 
-il void add(int u, int v, ll w, ll c) {
+il void add(int u, int v, int w, int c) {
     e[++cnt].to = v, e[cnt].w = w, e[cnt].c = c;
     e[cnt].nxt = head[u], head[u] = cnt;
     e[++cnt].to = u, e[cnt].w = 0, e[cnt].c = -c;
@@ -64,8 +62,7 @@ il void add(int u, int v, ll w, ll c) {
     return;
 }
 
-namespace MCMF {
-ll dis[maxn], flow[maxn], maxflow, mincost;
+int dis[maxn], flow[maxn], maxflow, mincost;
 int pre[maxn], inq[maxn];
 
 bool SPFA() {
@@ -109,20 +106,27 @@ void MCMF() {
     while (SPFA()) update();
     return;
 }
-} // namespace MCMF
 
-int n, m;
+int n, m, k;
+
+struct edge1 {
+    int u, v, w, c;
+} e0[maxm];
 
 int main() {
-    read(n), read(m);
-    s = n + 1, t = n;
-    FOR(i, 2, n - 1) add(i, i + n, 1, 0);
-    FOR(i, 1, m) {
-        int u, v, c;
-        read(u), read(v), read(c);
-        add(u + n, v, 1, c);
-    }
-    MCMF::MCMF();
-    print(MCMF::maxflow), putchar(' '), print(MCMF::mincost);
+    read(n), read(m), read(k);
+    s = 1, t = n;
+    FOR(i, 1, m)
+        read(e0[i].u), read(e0[i].v), read(e0[i].w), read(e0[i].c);
+    FOR(i, 1, m) add(e0[i].u, e0[i].v, e0[i].w, e0[i].c);
+    MCMF();
+    print(maxflow), putchar(' ');
+    k += maxflow;
+    maxflow = 0, mincost = 0;
+    memset(head, 0, sizeof head), cnt = 1;
+    s = 0, add(s, 1, k, 0);
+    FOR(i, 1, m) add(e0[i].u, e0[i].v, e0[i].w, 0), add(e0[i].u, e0[i].v, INF, e0[i].c);
+    MCMF();
+    print(mincost), putchar('\n');
     return output(), 0;
 }
