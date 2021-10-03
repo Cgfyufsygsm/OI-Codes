@@ -26,7 +26,7 @@ void read(char *s) {
 }
 char obuf[maxc], *__pO = obuf;
 il void putchar(char c) {*__pO++ = c;}
-template<typename T> void print(T x) {
+template<typename T> void print(const T &x) {
     if (x < 0) putchar('-'), print(-x);
     else {
         if (x > 9) print(x / 10);
@@ -34,6 +34,7 @@ template<typename T> void print(T x) {
     }
     return;
 }
+template<typename T> il void print(const T &x, const char &c) {print(x), putchar(c);}
 void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
 } // namespace fastIO
 
