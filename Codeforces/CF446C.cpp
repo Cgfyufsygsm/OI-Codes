@@ -1,11 +1,10 @@
 #include <cstdio>
 #include <cctype>
-#include <algorithm>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 
-const int mod = 1e9 + 7;
+const int mod = 1e9 + 9;
 
 struct modint {
     typedef int INT;
@@ -81,7 +80,7 @@ template<typename T> void read(T &n) {
 }
 char obuf[maxc], *__pO = obuf;
 il void putchar(char c) {*__pO++ = c;}
-template<typename T> void print(T x) {
+template<typename T> void print(const T &x) {
     if (x < 0) putchar('-'), print(-x);
     else {
         if (x > 9) print(x / 10);
@@ -92,22 +91,79 @@ template<typename T> void print(T x) {
 void print(modint x) {
     print(x.val);
 }
+template<typename T> il void print(const T &x, const char &c) {print(x), putchar(c);}
 void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
 }
 
 using namespace fastIO;
 
-const int maxn = 1e5 + 5;
-modint fac[maxn << 1];
-const modint inv2 = qPow(modint(2), modint(mod - 2));
+const modint coef = 276601605, base[2] = {691504013, 308495997}, inv[2] = {qPow(base[0] - 1, mod - 2), qPow(base[1] - 1, mod - 2)};
+const int maxn = 3e5 + 5;
+modint pow[maxn][2];
+
+struct node {
+    modint sum, tag;
+} t[maxn << 2][2];
+
+#define L (k << 1)
+#define R (L | 1)
+#define M ((i + j) >> 1)
+
+void pushdown(int i, int j, int k) {
+    FOR(p, 0, 1) {
+        if (t[k][p].tag != 0) {
+            t[L][p].tag += t[k][p].tag;
+            t[R][p].tag += t[k][p].tag * pow[M - i + 1][p];
+            t[L][p].sum += t[k][p].tag * inv[p] * (pow[M - i + 1][p] - 1);
+            t[R][p].sum += t[k][p].tag * pow[M - i + 1][p] * inv[p] * (pow[j - M][p] - 1);
+            t[k][p].tag = 0;
+        }
+    }
+}
+
+void pushup(int i, int j, int k) {
+    FOR(p, 0, 1) t[k][p].sum = t[L][p].sum + t[R][p].sum;
+    return;
+}
+
+modint query(int i, int j, int k, int x, int y) {
+    if (x <= i && y >= j) return t[k][0].sum - t[k][1].sum;
+    pushdown(i, j, k);
+    modint ret = 0;
+    if (x <= M) ret += query(i, M, L, x, y);
+    if (y > M) ret += query(M + 1, j, R, x, y);
+    return ret;
+}
+
+void modify(int i, int j, int k, int x, int y) {
+    if (x <= i && y >= j) {
+        FOR(p, 0, 1) {
+            t[k][p].sum += pow[i - x + 1][p] * (pow[j - i + 1][p] - 1) * inv[p];
+            t[k][p].tag += pow[i - x + 1][p];
+        }
+        return;
+    }
+    pushdown(i, j, k);
+    if (x <= M) modify(i, M, L, x, y);
+    if (y > M) modify(M + 1, j, R, x, y);
+    pushup(i, j, k);
+    return;
+}
+
+modint a[maxn];
 
 int main() {
-    int T; read(T);
-    fac[0] = 1;
-    FOR(i, 1, (int)2e5) fac[i] = i * fac[i - 1];
-    while (T--) {
-        int n; read(n);
-        print(fac[n << 1] * inv2), putchar('\n');
+    int n, m; read(n), read(m);
+    pow[0][0] = pow[0][1] = 1;
+    FOR(i, 1, n) {
+        read(a[i]), a[i] += a[i - 1];
+        FOR(k, 0, 1) pow[i][k] = base[k] * pow[i - 1][k];
+    }
+    while (m--) {
+        int op, l, r;
+        read(op), read(l), read(r);
+        if (op == 1) modify(1, n, 1, l, r);
+        else print(coef * query(1, n, 1, l, r) + a[r] - a[l - 1], '\n');
     }
     return output(), 0;
 }

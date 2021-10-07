@@ -18,19 +18,19 @@ int main() {
         int n, m;
         scanf("%d %d", &n, &m);
         FOR(i, 1, n) {
-			scanf("%s", str + 1);
-			FOR(j, 1, m) a[i][j] = str[j] - '0';
-		}
-		FOR(j, 1, m) FOR(i, 1, n) sum[i][j] = sum[i - 1][j] + a[i][j];
-		FOR(i, 1, n) FOR(j, i + 4, n) f[1][i][j] = 1e9;
+            scanf("%s", str + 1);
+            FOR(j, 1, m) a[i][j] = str[j] - '0';
+        }
+        FOR(j, 1, m) FOR(i, 1, n) sum[i][j] = sum[i - 1][j] + a[i][j];
+        FOR(i, 1, n) FOR(j, i + 4, n) f[1][i][j] = 1e9;
         int ans = 1e9;
         FOR(l, 4, m) {
             FOR(i, 1, n - 4) {
                 FOR(j, i + 4, n) {
                     f[l & 1][i][j] = f[(l & 1) ^ 1][i][j] - cnt0(l - 1, i + 1, j - 1) + cnt1(l - 1, i + 1, j - 1)
-                                        + cnt0(l, i + 1, j - 1) + (1 - a[i][l - 1]) + (1 - a[j][l - 1]);
+                        + cnt0(l, i + 1, j - 1) + (1 - a[i][l - 1]) + (1 - a[j][l - 1]);
                     f[l & 1][i][j] = min(f[l & 1][i][j], cnt0(l - 3, i + 1, j - 1) + cnt1(l - 2, i + 1, j - 1) + cnt1(l - 1, i + 1, j - 1)
-                                            + cnt0(l, i + 1, j - 1) + (2 - a[i][l - 1] - a[i][l - 2]) + (2 - a[j][l - 1] - a[j][l - 2]));
+                        + cnt0(l, i + 1, j - 1) + (2 - a[i][l - 1] - a[i][l - 2]) + (2 - a[j][l - 1] - a[j][l - 2]));
                     ans = min(ans, f[l & 1][i][j]);
                 }
             }
