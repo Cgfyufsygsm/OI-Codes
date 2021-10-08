@@ -55,15 +55,15 @@ struct modint {
 
     il modint operator+() const {return *this;}
     il modint operator-() const {return modint() - *this;}
-    
-    friend modint qPow(modint base, modint exp) {
-    	base.check();
-    	modint ret = 1;
-    	for (INT p = exp.val; p; p >>= 1, base *= base)
-    		if (p & 1) ret *= base;
-    	return ret;
-	}
 };
+
+modint qPow(modint base, modint exp) {
+    base.check();
+    modint ret = 1;
+    for (auto p = exp.val; p; p >>= 1, base *= base)
+        if (p & 1) ret *= base;
+    return ret;
+}
 
 namespace fastIO {
 const int maxc = 1 << 23;
