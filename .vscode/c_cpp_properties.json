@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${default}"
+            ],
+            "compilerPath": "D:\\Program Files (x86)\\Dev-Cpp\\TDM-GCC-64\\bin\\gcc.exe",
+            "cStandard": "c89",
+            "intelliSenseMode": "windows-gcc-x64"
+        }
+    ],
+    "version": 4
+}
