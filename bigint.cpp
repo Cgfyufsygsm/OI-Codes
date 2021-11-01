@@ -21,6 +21,7 @@ struct BigInt {
         if (n < 0) neg = 1, n = -n;
         else neg = 0;
         val.clear();
+        if (!n) val.push_back(0);
         while (n) {
             val.push_back(n % carry);
             n /= carry;

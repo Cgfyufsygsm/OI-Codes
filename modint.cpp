@@ -97,6 +97,17 @@ void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
 
 using namespace fastIO;
 
+template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
+template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
+template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
+template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
+template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
+template<typename T> il void myswap(T &a, T &b) {
+    T t = a;
+    a = b, b = t;
+    return;
+}
+
 int main() {
     return output(), 0;
 }
