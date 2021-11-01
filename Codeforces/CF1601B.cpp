@@ -1,5 +1,4 @@
-#include <cstdio>
-#include <cctype>
+#include <bits/stdc++.h>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -39,9 +38,10 @@ void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
 } // namespace fastIO
 
 using namespace fastIO;
+using namespace std;
 
-template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
-template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
+template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
+template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
 template<typename T> il void myswap(T &a, T &b) {
     T t = a;
@@ -49,33 +49,40 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+
+const int maxn = 3e5 + 5;
+int a[maxn], b[maxn], n, vis[maxn], pre[maxn], add[maxn];
+set<int> S;
+vector<int> ans;
+queue<int> q;
 
 int main() {
-    int T; read(T);
+    read(n);
+    FOR(i, 1, n) read(a[i]);
+    FOR(i, 1, n) read(b[i]);
 
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
+    FOR(i, 1, n) S.insert(i - 1), vis[i - 1] = -1;
+    q.push(n), vis[n] = 0;
 
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        auto r = S.upper_bound(u), l = S.lower_bound(u - a[u]);
+        for (auto it = l; it != r; ++it) {
+            int v = *it;
+            if (vis[v + b[v]] == -1) vis[v + b[v]] = vis[u] + 1, pre[v + b[v]] = u, add[v + b[v]] = b[v], q.push(v + b[v]);
         }
+        S.erase(l, r);
     }
+
+    if (~vis[0]) {
+        print(vis[0], '\n');
+        int now = 0;
+        while (now != n) {
+            ans.push_back(now);
+            now = pre[now];
+        }
+        reverse(ans.begin(), ans.end());
+        for (auto u : ans) print(u - add[u], ' ');
+    } else print(-1, '\n');
     return output(), 0;
 }

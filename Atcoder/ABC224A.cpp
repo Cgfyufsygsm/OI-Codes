@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cctype>
+#include <cstring>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -49,33 +50,13 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+const int maxn = 25;
+char s[maxn];
 
 int main() {
-    int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
-
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
-        }
-    }
-    return output(), 0;
+    read(s);
+    int n = strlen(s);
+    if (s[n - 1] == 'r') puts("er");
+    else puts("ist");
+    return output(), 0; 
 }

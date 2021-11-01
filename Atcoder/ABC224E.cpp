@@ -1,5 +1,9 @@
 #include <cstdio>
 #include <cctype>
+#include <vector>
+#include <queue>
+#include <cstring>
+#include <algorithm>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -49,33 +53,30 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+const int maxn = 2e5 + 5;
+int rv[maxn], cv[maxn];
+int n, h, w, ans[maxn];
+
+struct node {
+    int id, x, y, c;
+} a[maxn];
 
 int main() {
-    int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
-
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
+    read(h), read(w), read(n);
+    FOR(i, 1, n)
+        read(a[i].x), read(a[i].y), read(a[i].c), a[i].id = i;
+    std::sort(a + 1, a + n + 1, [](const node &a, const node &b) {return a.c > b.c;});
+    memset(rv, -1, sizeof rv), memset(cv, -1, sizeof cv);
+    std::queue<int> q;
+    FOR(i, 1, n) {
+        ans[a[i].id] = max(rv[a[i].x], cv[a[i].y]) + 1;
+        q.push(i);
+        if (i < n && a[i].c != a[i + 1].c) while (!q.empty()) {
+            int id = q.front(); q.pop();
+            rv[a[id].x] = max(rv[a[id].x], ans[a[id].id]);
+            cv[a[id].y] = max(cv[a[id].y], ans[a[id].id]);
         }
     }
+    FOR(i, 1, n) print(ans[i], '\n');
     return output(), 0;
 }

@@ -42,6 +42,8 @@ using namespace fastIO;
 
 template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
 template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
+template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
+template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
 template<typename T> il void myswap(T &a, T &b) {
     T t = a;
@@ -49,32 +51,27 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+const int maxn = 2005;
+int a[maxn][maxn], vis[maxn], n;
 
 int main() {
     int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
-
     while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
+        read(n);
+        FOR(i, 1, n) read(a[i][0]);
+        int cnt = 0;
+        while (true) {
+            ++cnt;
+            bool flag = 1;
+            FOR(i, 1, n) vis[i] = 0;
+            FOR(i, 1, n) ++vis[a[i][cnt - 1]];
+            FOR(i, 1, n) a[i][cnt] = vis[a[i][cnt - 1]], flag &= (a[i][cnt] == a[i][cnt - 1]);
+            if (flag) break;
+        }
+        int q; read(q);
+        while (q--) {
+            int x, k; read(x), read(k);
+            print(a[x][k >= cnt ? cnt : k], '\n');
         }
     }
     return output(), 0;

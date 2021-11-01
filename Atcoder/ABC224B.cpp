@@ -50,32 +50,13 @@ template<typename T> il void myswap(T &a, T &b) {
 }
 
 const int maxn = 105;
-int iscn[20005], a[maxn];
+int a[maxn][maxn];
+int n, m;
 
 int main() {
-    int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
-
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
-        }
-    }
+    read(n), read(m);
+    FOR(i, 1, n) FOR(j, 1, m) read(a[i][j]);
+    FOR(i1, 1, n) FOR(i2, i1 + 1, n) FOR(j1, 1, m) FOR(j2, j1 + 1, m) if (a[i1][j1] + a[i2][j2] > a[i2][j1] + a[i1][j2]) return puts("No"), 0;
+    puts("Yes");
     return output(), 0;
 }

@@ -1,5 +1,7 @@
 #include <cstdio>
 #include <cctype>
+#include <map>
+#include <queue>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -49,33 +51,50 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+const int maxn = 35;
+int m, powten[15];
+std::map<int, int> mp;
+std::vector<int> G[10];
 
-int main() {
-    int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
-
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
+void bfs(int st) {
+    std::queue<int> q;
+    q.push(st);
+    mp[st] = 0;
+    while (!q.empty()) {
+        int now = q.front(); q.pop();
+        int tmp = now, u;
+        FOR(i, 1, 9) {
+            if (!(tmp % 10)) {
+                u = i;
+                break;
             }
-            putchar('\n');
+            tmp /= 10;
+        }
+        for (auto v : G[u]) {
+            int to = now;
+            int tmp = now / powten[v - 1] % 10;
+            to -= tmp * powten[v - 1];
+            to += tmp * powten[u - 1];
+            if (!mp.count(to)) mp[to] = mp[now] + 1, q.push(to);
         }
     }
+}
+
+int main() {
+    read(m);
+    powten[0] = 1;
+    FOR(i, 1, 9) powten[i] = 10 * powten[i - 1];
+    FOR(i, 1, m) {
+        int u, v; read(u), read(v);
+        G[u].push_back(v), G[v].push_back(u);
+    }
+    int msk = 0;
+    FOR(i, 1, 8) {
+        int x; read(x);
+        msk += powten[x - 1] * i;
+    }
+    bfs(msk);
+    if (mp.count(87654321)) print(mp[87654321], '\n');
+    else print(-1, '\n');
     return output(), 0;
 }

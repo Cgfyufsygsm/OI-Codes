@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cctype>
+#include <vector>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -42,6 +43,8 @@ using namespace fastIO;
 
 template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
 template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
+template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
+template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
 template<typename T> il void myswap(T &a, T &b) {
     T t = a;
@@ -49,33 +52,30 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+const int maxn = 1e5 + 5, maxm = 2e5 + 5;
+int n, m;
+int u0[maxm], v0[maxm], deg[maxn], tag[maxn];
+std::vector<int> G[maxn];
+
+il bool cmp(int u, int v) {
+    return deg[u] != deg[v] ? deg[u] < deg[v] : u < v;
+}
 
 int main() {
-    int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
+    read(n), read(m);
+    FOR(i, 1, m) {
+        read(u0[i]), read(v0[i]);
+        ++deg[u0[i]], ++deg[v0[i]];
     }
-
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
-        }
+    FOR(i, 1, m) {
+        if (cmp(u0[i], v0[i])) G[u0[i]].push_back(v0[i]);
+        else G[v0[i]].push_back(u0[i]);
     }
+    int ans = 0;
+    FOR(u, 1, n) {
+        for (auto &v : G[u]) tag[v] = u;
+        for (auto &v : G[u]) for (auto &w : G[v]) if (tag[w] == u) ++ans;
+    }
+    print(ans, '\n');
     return output(), 0;
 }

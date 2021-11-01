@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cctype>
+#include <set>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -42,6 +43,8 @@ using namespace fastIO;
 
 template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
 template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
+template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
+template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
 template<typename T> il void myswap(T &a, T &b) {
     T t = a;
@@ -49,33 +52,57 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+using ll = long long;
+
+struct node {
+    ll l, r;
+    mutable bool val;
+    node(ll _l, ll _r = 1e18, bool _rev = 0) : l(_l), r(_r), val(_rev) {}
+    il friend bool operator<(const node &a, const node &b) {return a.l < b.l;}
+};
+std::set<node> S;
+using IT = std::set<node>::iterator;
+
+IT split(ll pos) {
+    auto it = S.lower_bound(node(pos));
+    if (it != S.end() && it->l == pos) return it;
+    --it;
+    if (it->r < pos) return S.end();
+    ll l = it->l, r = it->r;
+    bool val = it->val;
+    S.erase(it);
+    S.insert(node(l, pos - 1, val));
+    return S.insert(node(pos, r, val)).first;
+}
+
+void assign(ll l, ll r, bool val) {
+    auto itr = split(r + 1), itl = split(l);
+    S.erase(itl, itr);
+    S.insert(node(l, r, val));
+    return;
+}
+
+void reverse(ll l, ll r) {
+    auto itr = split(r + 1), itl = split(l);
+    for (auto it = itl; it != itr; ++it) it->val ^= 1;
+    return;
+}
+
+ll query() {
+    for (auto i : S) if (i.val == 0) return i.l;
+    return (ll)1e18 + 1;
+}
 
 int main() {
-    int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
-
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
-        }
+    int n; read(n);
+    S.insert(node(1, 1e18, 0));
+    while (n--) {
+        int op; read(op);
+        ll l, r; read(l), read(r);
+        if (op == 1) assign(l, r, 1);
+        else if (op == 2) assign(l, r, 0);
+        else reverse(l, r);
+        print(query(), '\n');
     }
     return output(), 0;
 }

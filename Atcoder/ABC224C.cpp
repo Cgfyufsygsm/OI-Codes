@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cctype>
+#define int long long
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -49,33 +50,22 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+const int maxn = 305;
+int n;
 
-int main() {
-    int T; read(T);
+struct Point {
+    int x, y;
+    Point(int _x = 0, int _y = 0) : x(_x), y(_y) {}
+} p[maxn];
 
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
+Point operator-(const Point &a, const Point &b) {return Point(a.x - b.x, a.y - b.y);}
+int operator^(const Point &a, const Point &b) {return a.x * b.y - a.y * b.x;}
 
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
-        }
-    }
+signed main() {
+    read(n);
+    FOR(i, 1, n) read(p[i].x), read(p[i].y);
+    int ans = 0;
+    FOR(i, 1, n) FOR(j, i + 1, n) FOR(k, j + 1, n) if (((p[i] - p[j]) ^ (p[i] - p[k]))) ++ans;
+    print(ans, '\n');
     return output(), 0;
 }

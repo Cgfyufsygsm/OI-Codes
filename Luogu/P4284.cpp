@@ -49,33 +49,60 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+using db = double;
+const int maxn = 5e5 + 5;
+int n, head[maxn], to[maxn << 1], nxt[maxn << 1], cnte;
+db q[maxn << 1], p[maxn];
+
+db f[maxn], g[maxn], h[maxn], ans;
+
+il void add(int u, int v, db pr) {
+    to[++cnte] = v;
+    nxt[cnte] = head[u];
+    q[cnte] = pr;
+    head[u] = cnte;
+    return;
+}
+
+void dfs1(int u, int fa) {
+    f[u] = 1 - p[u];
+    for (int i = head[u]; i; i = nxt[i]) {
+        int &v = to[i];
+        if (v == fa) continue;
+        dfs1(v, u);
+        f[u] *= (f[v] + (1 - f[v]) * (1 - q[i]));
+    }
+    return;
+}
+
+void dfs2(int u, int fa, int pre) {
+    if (fa) {
+        db h;
+        h = (f[u] + (1 - f[u]) * (1 - q[pre])) > 1e-6 ? g[fa] * f[fa] / (f[u] + (1 - f[u]) * (1 - q[pre])) : 0;
+        g[u] = h + (1 - h) * (1 - q[pre]);
+    } else g[u] = 1;
+    for (int i = head[u]; i; i = nxt[i]) {
+        int &v = to[i];
+        if (v == fa) continue;
+        dfs2(v, u, i);
+    }
+    return;
+}
 
 int main() {
-    int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
+    read(n);
+    FOR(i, 1, n - 1) {
+        int u, v, p;
+        read(u), read(v), read(p);
+        add(u, v, p * 0.01), add(v, u, p * 0.01);
     }
-
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
-        }
+    FOR(i, 1, n) {
+        int pr; read(pr);
+        p[i] = pr * 0.01;
     }
+    dfs1(1, 0);
+    dfs2(1, 0, 0);
+    FOR(i, 1, n) ans += 1 - f[i] * g[i];
+    printf("%.6lf\n", ans);
     return output(), 0;
 }

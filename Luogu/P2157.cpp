@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cctype>
+#include <cstring>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
@@ -49,33 +50,49 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 105;
-int iscn[20005], a[maxn];
+const int maxn = 1005, INF = 0x3f3f3f3f;
+int a[maxn], b[maxn], n;
+int f[maxn][(1 << 8) | 50][20];
+
+il int cost(int i, int j) {
+    if (!i) return 0;
+    else return a[i] ^ a[j];
+}
+
+il void tomin(int &a, int b) {
+    a = min(a, b);
+    return;
+}
+
+void solve() {
+    read(n);
+    FOR(i, 1, n) read(a[i]), read(b[i]);
+    memset(f, 0x3f, sizeof f);
+    f[1][0][7] = 0;
+    FOR(i, 1, n) {
+        FOR(S, 0, (1 << 8) - 1) {
+            FOR(k, -8, 7) {
+                if (i + k < 0 || i + k > n) continue;
+                if (f[i][S][8 + k] >= INF) continue;
+                int lim = INF;
+                if (S & 1) tomin(f[i + 1][S >> 1][7 + k], f[i][S][8 + k]);
+                else FOR(j, 0, 7) {
+                    if (i + j > n || i + j > lim) break;
+                    if (S & (1 << j)) continue;
+                    lim = min(lim, i + j + b[i + j]);
+                    tomin(f[i][S | (1 << j)][8 + j], f[i][S][8 + k] + cost(i + k, i + j));
+                }
+            }
+        }
+    }
+    int ans = INF;
+    FOR(k, -8, 7) tomin(ans, f[n + 1][0][8 + k]);
+    print(ans, '\n');
+    return;
+}
 
 int main() {
     int T; read(T);
-
-    FOR(i, 2, 20000) {
-        for (int j = 2 * i; j <= 20000; j += i)
-            iscn[j] = 1;
-    }
-
-    while (T--) {
-        int n, sum = 0; read(n);
-        FOR(i, 1, n) read(a[i]), sum += a[i];
-        if (iscn[sum]) {
-            print(n, '\n');
-            FOR(i, 1, n) print(i, i == n ? '\n' : ' ');
-        } else {
-            print(n - 1, '\n');
-            int del, maxs = 0;
-            FOR(i, 1, n) if (iscn[sum - a[i]] && sum - a[i] > maxs) maxs = sum - a[i], del = i;
-            FOR(i, 1, n) {
-                if (del == i) continue;
-                print(i, ' ');
-            }
-            putchar('\n');
-        }
-    }
+    while (T--) solve();
     return output(), 0;
 }
