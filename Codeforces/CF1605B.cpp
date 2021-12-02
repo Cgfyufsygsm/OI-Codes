@@ -26,38 +26,17 @@ void read(char *s) {
     while (isalpha(c) || isdigit(c)) s[p++] = c, c = getchar();
     return;
 }
-template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
-    read(a), read(x...);
-    return;
-}
 char obuf[maxc], *__pO = obuf;
 il void putchar(char c) {*__pO++ = c;}
-template<typename T> void print(T x, char c = '\n') {
-    static char stk[50];
-    int top = 0;
-    if (x < 0) putchar('-'), x = -x;
-    if (x) {
-        for (; x; x /= 10) stk[++top] = x % 10 + '0';
-        while (top) putchar(stk[top--]);
-    } else putchar('0');
-    putchar(c);
+template<typename T> void print(const T &x) {
+    if (x < 0) putchar('-'), print(-x);
+    else {
+        if (x > 9) print(x / 10);
+        putchar(x % 10 + '0');
+    }
     return;
 }
-void print(char *s, char c = '\n') {
-    for (int i = 0; s[i]; ++i) putchar(s[i]);
-    putchar(c);
-    return;
-}
-void print(const char *s, char c = '\n') {
-    for (int i = 0; s[i]; ++i) putchar(s[i]);
-    putchar(c);
-    return;
-}
-template<typename T1, typename... T2> il void print(T1 a, T2... x) {
-    if (!sizeof...(x)) print(a);
-    else print(a, ' '), print(x...);
-    return;
-}
+template<typename T> il void print(const T &x, const char &c) {print(x), putchar(c);}
 void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
 } // namespace fastIO
 
@@ -65,14 +44,6 @@ using namespace fastIO;
 
 template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
 template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
-template<typename T, typename...Args> il T max(const T &a, const Args&... args) {
-    T res = max(args...);
-    return max(a, res);
-}
-template<typename T, typename...Args> il T min(const T &a, const Args&... args) {
-    T res = min(args...);
-    return min(a, res);
-}
 template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
 template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
@@ -82,7 +53,42 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 1005;
+char s[maxn];
+int n;
+
+bool sorted() {
+    int pos;
+    for (pos = 1; pos <= n; ++pos)
+        if (s[pos] == '1') break;
+    FOR(i, 1, pos - 1) if (s[i] == '1') return 0;
+    FOR(i, pos, n) if (s[i] == '0') return 0;
+    return 1;
+}
+
 int main() {
+    ios::sync_with_stdio(false);
+    int T; cin >> T;
+    while (T--) {
+        cin >> n;
+        cin >> s + 1;
+        if (sorted()) cout << 0 << endl;
+        else {
+            cout << 1 << endl;
+            int cnt0 = 0, cnt1 = 0;
+            vector<int> ans;
+            FOR(i, 1, n) {
+                if (s[i] == '0') ++cnt0;
+                else ++cnt1;
+            }
+            FOR(i, 1, n - cnt1) if (s[i] == '1') ans.push_back(i);
+            FOR(i, n - cnt1 + 1, n) if (s[i] == '0') ans.push_back(i);
+            sort(ans.begin(), ans.end());
+            cout << ans.size() << ' ';
+            for (auto x : ans) cout << x << ' ';
+            cout << endl;
+        }
+    }
     return output(), 0;
 }
 

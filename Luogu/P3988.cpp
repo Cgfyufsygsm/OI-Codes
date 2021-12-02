@@ -82,7 +82,59 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 7e5 + 5;
+struct node {
+    int val, key, size;
+    int ch[2];
+} t[maxn];
+int n, tot, root;
+
+#define ls(k) t[k].ch[0]
+#define rs(k) t[k].ch[1]
+
+int newnode(int val) {
+    ++tot;
+    t[tot].size = 1;
+    t[tot].val = val;
+    t[tot].key = rand();
+    t[tot].ch[0] = t[tot].ch[1] = 0;
+    return tot;
+}
+
+void pushup(int k) {
+    t[k].size = t[ls(k)].size + t[rs(k)].size + 1;
+    return;
+}
+
+void split(int k, int size, int &x, int &y) {
+    if (!k) return x = y = 0, void();
+    if (t[ls(k)].size + 1 <= size)
+        x = k, split(rs(k), size - t[ls(k)].size - 1, rs(k), y);
+    else y = k, split(ls(k), size, x, ls(k));
+    pushup(k);
+    return;
+}
+
+int merge(int x, int y) {
+    if (!x || !y) return x + y;
+    if (t[x].key < t[y].key)
+        return t[x].ch[1] = merge(t[x].ch[1], y), pushup(x), x;
+    else return t[y].ch[0] = merge(x, t[y].ch[0]), pushup(y), y;
+}
+
 int main() {
+    read(n);
+    FOR(i, 1, n) root = merge(root, newnode(i));
+    while (n--) {
+        int r; read(r);
+        r %= (n + 1);
+        int x, y;
+        split(root, r, x, y);
+        root = merge(y, x);
+        split(root, 1, x, y);
+        print(t[x].val);
+        root = y;
+    }
     return output(), 0;
 }
 

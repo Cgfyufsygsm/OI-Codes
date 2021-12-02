@@ -1,13 +1,13 @@
-#include <iostream>
-#include <iomanip>
-#include <algorithm>
-#include <vector>
+#include <bits/stdc++.h>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 
 using namespace std;
-typedef long long ll;
+
+namespace YangTY {
+
+using ll = long long;
 
 namespace BigInteger {
 const int p = 8, carry = 1e8;
@@ -203,5 +203,12 @@ BigInt operator%(BigInt a, ll b) {return a - a / b * b;}
 using BigInteger::BigInt;
 
 int main() {
+    return 0;
+}
+
+} // namespace YangTY
+
+int main() {
+    YangTY::main();
     return 0;
 }

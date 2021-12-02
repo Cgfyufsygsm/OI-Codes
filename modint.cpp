@@ -1,14 +1,17 @@
-#include <cstdio>
-#include <cctype>
+#include <bits/stdc++.h>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
+
+using namespace std;
+
+namespace YangTY {
 
 const int mod = 998244353;
 
 struct modint {
     typedef int INT;
-    static const INT mod = ::mod;
+    static const INT mod = YangTY::mod;
     INT val;
     il void check() {
         val >= mod ? val %= mod : true;
@@ -78,27 +81,61 @@ template<typename T> void read(T &n) {
         n = n * 10 + c - '0', c = getchar();
     n = x ? -n : n;
 }
-char obuf[maxc], *__pO = obuf;
-il void putchar(char c) {*__pO++ = c;}
-template<typename T> void print(const T &x) {
-    if (x < 0) putchar('-'), print(-x);
-    else {
-        if (x > 9) print(x / 10);
-        putchar(x % 10 + '0');
-    }
+void read(char *s) {
+    int p = 0;
+    char c = getchar();
+    while (!isdigit(c) && !isalpha(c)) c = getchar();
+    while (isalpha(c) || isdigit(c)) s[p++] = c, c = getchar();
     return;
 }
-void print(modint x) {
-    print(x.val);
+template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
+    read(a), read(x...);
+    return;
 }
-template<typename T> il void print(const T &x, const char &c) {print(x), putchar(c);}
+char obuf[maxc], *__pO = obuf;
+il void putchar(char c) {*__pO++ = c;}
+template<typename T> void print(T x, char c = '\n') {
+    static char stk[50];
+    int top = 0;
+    if (x < 0) putchar('-'), x = -x;
+    if (x) {
+        for (; x; x /= 10) stk[++top] = x % 10 + '0';
+        while (top) putchar(stk[top--]);
+    } else putchar('0');
+    putchar(c);
+    return;
+}
+void print(char *s, char c = '\n') {
+    for (int i = 0; s[i]; ++i) putchar(s[i]);
+    putchar(c);
+    return;
+}
+void print(const char *s, char c = '\n') {
+    for (int i = 0; s[i]; ++i) putchar(s[i]);
+    putchar(c);
+    return;
+}
+il void print(modint x) {print(x.val);}
+template<typename T1, typename... T2> il void print(T1 a, T2... x) {
+    if (!sizeof...(x)) print(a);
+    else print(a, ' '), print(x...);
+    return;
+}
 void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
-}
+} // namespace fastIO
 
 using namespace fastIO;
 
 template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
 template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
+template<typename T, typename...Args> il T max(const T &a, const Args&... args) {
+    T res = max(args...);
+    return max(a, res);
+}
+template<typename T, typename...Args> il T min(const T &a, const Args&... args) {
+    T res = min(args...);
+    return min(a, res);
+}
 template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
 template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
@@ -110,4 +147,10 @@ template<typename T> il void myswap(T &a, T &b) {
 
 int main() {
     return output(), 0;
+}
+}// namespace YangTY
+
+int main() {
+    YangTY::main();
+    return 0;
 }

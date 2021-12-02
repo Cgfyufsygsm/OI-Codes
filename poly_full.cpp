@@ -1,9 +1,4 @@
-#include <cstdio>
-#include <cctype>
-#include <vector>
-#include <cstring>
-#include <algorithm>
-#include <cmath>
+#include <bits/stdc++.h>
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 #define VEC(i, v) for (int i = 0; i < (int)v.size(); ++i)
@@ -12,11 +7,15 @@
 #define cpy(f, g, n) memcpy(f, g, (sizeof(int)) * (n))
 #define NTT
 
+using namespace std;
+
+namespace YangTY {
+
 template<typename T> il T min(const T &a, const T &b) {return a < b ? a : b;}
 template<typename T> il T max(const T &a, const T &b) {return a > b ? a : b;}
 
-typedef long long ll;
-typedef unsigned long long ull;
+using ll = long long;
+using ull = unsigned long long;
 
 #ifdef NTT
 const int mod = 998244353;
@@ -26,7 +25,7 @@ int mod;
 
 namespace polynomial {
 const int maxn = 1 << 17 | 500, imgunit = 86583718;
-typedef std::vector<int> Poly;
+using Poly = vector<int>;
 const Poly one(1, 1);
 
 ll qPow(ll a, ll b = mod - 2) {
@@ -154,7 +153,8 @@ Poly operator*(const Poly &A, const Poly &B) {
 using NTT::operator*;
 #else
 namespace MTT {
-typedef long double db;
+
+using db = long double;
 
 using std::sin;
 using std::cos;
@@ -183,7 +183,7 @@ void DFT(Cmplx *g, int type, int lim) {
     FOR(i, 0, lim - 1) f[i] = g[tr[i]];
     for (int p = 2; p <= lim; p <<= 1) {
         int len = p >> 1;
-        Cmplx Wp(std::cos(PI / len), type * std::sin(PI / len));
+        Cmplx Wp(cos(PI / len), type * sin(PI / len));
         for (int k = 0; k < lim; k += p) {
             Cmplx w(1, 0);
             for (int l = k; l < k + len; ++l, w = w * Wp) {
@@ -325,7 +325,7 @@ Poly polySqrt(const Poly &A) {
 }
 
 il void reverse(Poly &A) {
-    std::reverse(A.begin(), A.end());
+    reverse(A.begin(), A.end());
 }
 
 void polyDiv(const Poly &A, const Poly &B, Poly &Q, Poly &R) {
@@ -358,8 +358,8 @@ Poly polyAtan(const Poly &A) {
     return ints(deri(A) * polyInv(one + A * A));
 }
 
-namespace multi_eval_and_interpolation
-{
+namespace multi_eval_and_interpolation {
+
 #define L (k << 1)
 #define R (L | 1)
 #define M ((l + r) >> 1)
@@ -453,27 +453,57 @@ template<typename T> void read(T &n) {
         n = n * 10 + c - '0', c = getchar();
     n = x ? -n : n;
 }
-char obuf[maxc], *__pO = obuf;
-il void putchar(char c) {*__pO++ = c;}
-template<typename T> void print(const T &x) {
-    if (x < 0) putchar('-'), print(-x);
-    else {
-        if (x > 9) print(x / 10);
-        putchar(x % 10 + '0');
-    }
+void read(char *s) {
+    int p = 0;
+    char c = getchar();
+    while (!isdigit(c) && !isalpha(c)) c = getchar();
+    while (isalpha(c) || isdigit(c)) s[p++] = c, c = getchar();
     return;
 }
-template<typename T> il void print(const T &x, const char &c) {print(x), putchar(c);}
-void print(Poly A) {
-    VEC(i, A) print(A[i], ' ');
-    putchar('\n');
+template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
+    read(a), read(x...);
+    return;
+}
+char obuf[maxc], *__pO = obuf;
+il void putchar(char c) {*__pO++ = c;}
+template<typename T> void print(T x, char c = '\n') {
+    static char stk[50];
+    int top = 0;
+    if (x < 0) putchar('-'), x = -x;
+    if (x) {
+        for (; x; x /= 10) stk[++top] = x % 10 + '0';
+        while (top) putchar(stk[top--]);
+    } else putchar('0');
+    putchar(c);
+    return;
+}
+void print(char *s, char c = '\n') {
+    for (int i = 0; s[i]; ++i) putchar(s[i]);
+    putchar(c);
+    return;
+}
+void print(const char *s, char c = '\n') {
+    for (int i = 0; s[i]; ++i) putchar(s[i]);
+    putchar(c);
+    return;
+}
+template<typename T1, typename... T2> il void print(T1 a, T2... x) {
+    if (!sizeof...(x)) print(a);
+    else print(a, ' '), print(x...);
     return;
 }
 void output() {fwrite(obuf, __pO - obuf, 1, stdout);}
-}// namespace fastIO
+} // namespace fastIO
 
 using namespace fastIO;
 
 int main() {
     return output(), 0;
+}
+
+} // namespace YangTY
+
+int main() {
+    YangTY::main();
+    return 0;
 }

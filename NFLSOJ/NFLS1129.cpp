@@ -82,7 +82,33 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+using int128 = __int128_t;
+const int maxn = 1e5 + 5;
+int n, vis[30], cnt;
+char s[maxn];
+int128 k;
+struct node {
+    int id, pos;
+} a[30];
+int ans[30];
+
 int main() {
+    read(s + 1), n = strlen(s + 1);
+    read(k);
+    if (n == 1) {
+        print(k - 1);
+        return output(), 0;
+    }
+    FOR(i, 1, n)
+        if (!vis[s[i] - 'A']) a[++cnt] = (node){s[i] - 'A', i}, vis[s[i] - 'A'] = 1;
+    --k;
+    DEC(i, cnt, 1) {
+        int now = k % 10;
+        if (i == 1) ans[a[i].id] = now + 1;
+        else ans[a[i].id] = now;
+        k /= 10;
+    }
+    FOR(i, 1, n) putchar(ans[s[i] - 'A'] + '0');
     return output(), 0;
 }
 

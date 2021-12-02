@@ -82,7 +82,16 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 2e5 + 5;
+int a[maxn], n;
+
 int main() {
+    read(n);
+    FOR(i, 1, n) read(a[i]);
+    sort(a + 1, a + n + 1);
+    n = unique(a + 1, a + n + 1) - a - 1;
+    if (n == 1) print(0);
+    else print(a[n - 1]);
     return output(), 0;
 }
 

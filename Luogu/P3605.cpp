@@ -82,7 +82,79 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 1e5 + 5;
+
+struct node {
+    int sum, ls, rs;
+} t[maxn * 100];
+
+#define ls(u) t[u].ls
+#define rs(u) t[u].rs
+#define M ((i + j) >> 1)
+
+int n, p0[maxn], p[maxn], rt[maxn], cnt;
+
+il void pushup(int k) {
+    t[k].sum = t[ls(k)].sum + t[rs(k)].sum;
+    return;
+}
+
+void modify(int i, int j, int &k, int x, int val) {
+    if (!k) k = ++cnt;
+    if (i == j) {
+        t[k].sum += val;
+        return;
+    }
+    if (x <= M) modify(i, M, ls(k), x, val);
+    else modify(M + 1, j, rs(k), x, val);
+    pushup(k);
+    return;
+}
+
+int merge(int i, int j, int k1, int k2) {
+    if (!k1 || !k2) return k1 | k2;
+    if (i == j) {
+        t[k1].sum += t[k2].sum;
+        return k1;
+    }
+    ls(k1) = merge(i, M, ls(k1), ls(k2));
+    rs(k1) = merge(M + 1, j, rs(k1), rs(k2));
+    return pushup(k1), k1;
+}
+
+int query(int i, int j, int k, int x, int y) {
+    if (!k) return 0;
+    if (x <= i && y >= j) return t[k].sum;
+    int ret = 0;
+    if (x <= M) ret += query(i, M, ls(k), x, y);
+    if (y > M) ret += query(M + 1, j, rs(k), x, y);
+    return ret;
+}
+
+vector<int> G[maxn];
+int ans[maxn];
+
+void dfs(int u) {
+    int nowp = lower_bound(p0 + 1, p0 + n + 1, p[u]) - p0;
+    modify(1, n, rt[u], nowp, 1);
+    for (auto v : G[u]) {
+        dfs(v);
+        rt[u] = merge(1, n, rt[u], rt[v]);
+    }
+    ans[u] = query(1, n, rt[u], nowp + 1, n);
+    return;
+}
+
 int main() {
+    read(n);
+    FOR(i, 1, n) read(p0[i]), p[i] = p0[i];
+    sort(p0 + 1, p0 + n + 1);
+    FOR(i, 2, n) {
+        int f; read(f);
+        G[f].push_back(i);
+    }
+    dfs(1);
+    FOR(i, 1, n) print(ans[i]);
     return output(), 0;
 }
 

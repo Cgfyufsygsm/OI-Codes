@@ -2,6 +2,7 @@
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
+#define lowbit(x) (x & -x)
 
 using namespace std;
 
@@ -82,7 +83,93 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 2e5 + 5;
+int n;
+struct node {
+    int x, y, z, w, cnt, id, ans, ok;
+    il bool operator==(const node &b) {return x == b.x && y == b.y && z == b.z && w == b.w;}
+} a[maxn], tmp[maxn];
+int w0[maxn], pos2[maxn], pos1[maxn];
+
+auto cmpx = [](const node &a, const node &b) {return a.x == b.x ? (a.y == b.y ? (a.z == b.z ? a.w < b.w : a.z < b.z) : a.y < b.y) : a.x < b.x;};
+auto cmpy = [](const node &a, const node &b) {return a.y == b.y ? (a.x == b.x ? (a.z == b.z ? a.w < b.w : a.z < b.z) : a.x < b.x) : a.y < b.y;};
+auto cmpz = [](const node &a, const node &b) {return a.z < b.z;};
+
+int t[maxn];
+
+void add(int x, int v) {
+    for (; x <= n; x += lowbit(x))
+        chkmax(t[x], v);
+    return;
+}
+
+int query(int x) {
+    int ans = 0;
+    for (; x; x -= lowbit(x))
+        chkmax(ans, t[x]);
+    return ans;
+}
+
+void del(int x) {
+    for (; x <= n; x += lowbit(x))
+        t[x] = 0;
+    return;
+}
+
+void solve2(int l, int r) {
+    if (l == r) return;
+    int mid = (l + r) >> 1;
+    solve2(l, mid);
+    sort(a + l, a + mid + 1, cmpz);
+    sort(a + mid + 1, a + r + 1, cmpz);
+    int i, j;
+    for (i = l, j = mid + 1; j <= r; ++j) {
+        while (a[i].z <= a[j].z && i <= mid) {
+            if (a[i].ok) add(a[i].w, a[i].ans);
+            ++i;
+        }
+        if (!a[j].ok) chkmax(a[j].ans, query(a[j].w) + a[j].cnt);
+    }
+    for (; i >= l; --i) if (a[i].ok) del(a[i].w);
+    FOR(i, l, r) tmp[pos2[a[i].id]] = a[i];
+    FOR(i, l, r) a[i] = tmp[i];
+    solve2(mid + 1, r);
+    return;
+}
+
+void solve1(int l, int r) {
+    if (l == r) return;
+    int mid = (l + r) >> 1;
+    solve1(l, mid);
+    FOR(i, l, mid) a[i].ok = 1;
+    FOR(i, mid + 1, r) a[i].ok = 0;
+    sort(a + l, a + r + 1, cmpy);
+    FOR(i, l, r) pos2[a[i].id] = i;
+    solve2(l, r);
+    FOR(i, l, r) tmp[pos1[a[i].id]] = a[i];
+    FOR(i, l, r) a[i] = tmp[i];
+    solve1(mid + 1, r);
+    return;
+}
+
 int main() {
+    read(n);
+    FOR(i, 1, n) read(a[i].x, a[i].y, a[i].z, a[i].w), w0[i] = a[i].w, a[i].cnt = 1;
+    sort(w0 + 1, w0 + n + 1);
+    int tot = unique(w0 + 1, w0 + n + 1) - w0 - 1;
+    FOR(i, 1, n) a[i].w = lower_bound(w0 + 1, w0 + tot + 1, a[i].w) - w0;
+    int n0 = n; n = 1;
+    sort(a + 1, a + n0 + 1, cmpx);
+    FOR(i, 2, n0) {
+        if (a[i].x != a[n].x || a[i].y != a[n].y || a[i].z != a[n].z || a[i].w != a[n].w)
+            a[++n] = a[i];
+        else a[n].cnt += a[i].cnt;
+    }
+    FOR(i, 1, n) a[i].id = i, a[i].ans = a[i].cnt, pos1[a[i].id] = i;
+    solve1(1, n);
+    int ans = 0;
+    FOR(i, 1, n) chkmax(ans, a[i].ans);
+    print(ans);
     return output(), 0;
 }
 

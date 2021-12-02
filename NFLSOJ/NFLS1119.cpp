@@ -82,7 +82,37 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 1e5 + 5, maxm = 2e5 + 5;
+
+int head[maxn], to[maxm << 1], nxt[maxm << 1], cnte = 1, ans[maxm], cnt, vis[maxm << 1];
+int n, m;
+
+il void add(int u, int v) {
+    to[++cnte] = v;
+    nxt[cnte] = head[u];
+    head[u] = cnte;
+    return;
+}
+
+void dfs(int u) {
+    for (int &i = head[u]; i; i = nxt[i]) if (!vis[i]) {
+        int j = i;
+        int &v = to[j];
+        vis[j] = vis[j ^ 1] = 1;
+        dfs(v);
+        ans[j >> 1] = ++cnt;
+    }
+    return;
+}
+
 int main() {
+    read(n, m);
+    FOR(i, 1, m) {
+        int u, v; read(u, v);
+        add(u, v), add(v, u);
+    }
+    dfs(1);
+    FOR(i, 1, m) print(ans[i], ' ');
     return output(), 0;
 }
 
