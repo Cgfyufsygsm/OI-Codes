@@ -1,7 +1,9 @@
 #include <bits/stdc++.h>
-#define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
-#define GO(u, x) for (int i = x[u], v = e[i].to; i; i = e[i].nxt, v = e[i].to)
 #define il inline
+#define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
+#define DEC(i, a, b) for (int i = (a); i >= (b); --i)
+
+using namespace std;
 
 namespace YangTY {
 namespace fastIO {
@@ -20,8 +22,8 @@ template<typename T> void read(T &n) {
 void read(char *s) {
     int p = 0;
     char c = getchar();
-    while (isspace(c)) c = getchar();
-    while (!isspace(c)) s[p++] = c, c = getchar();
+    while (!isdigit(c) && !isalpha(c)) c = getchar();
+    while (isalpha(c) || isdigit(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
@@ -80,79 +82,36 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 205, maxm = 5005;
+const int maxn = 1e5 + 5;
+vector<int> G[maxn];
+int n, m, vis[maxn], deg[maxn];
+int stk[maxn], top;
 
-typedef long long ll;
-const ll INF = 1e18;
-
-struct edge {
-    int to, nxt;
-    ll w;
-} e[maxm << 1];
-
-int head[maxn], dep[maxn], cur[maxn], cnt = 1;
-int n, m, s, t;
-
-il void add(int u, int v, int w) {
-    e[++cnt].to = v;
-    e[cnt].w = w;
-    e[cnt].nxt = head[u];
-    head[u] = cnt;
-    e[++cnt].to = u;
-    e[cnt].w = 0;
-    e[cnt].nxt = head[v];
-    head[v] = cnt;
-    return;
-}
-
-bool bfs() {
-    static int q[maxn], qhead, qtail;
-    memset(dep, -1, sizeof dep);
-    memcpy(cur, head, sizeof head);
-    q[qhead = qtail = 1] = s;
-    dep[s] = 0;
-    while (qhead <= qtail) {
-        int u = q[qhead++];
-        GO(u, head) {
-            if (e[i].w > 0 && dep[v] == -1) {
-                q[++qtail] = v;
-                dep[v] = dep[u] + 1;
-                if (v == t) return true;
-            }
-        }
-    }
+bool dfs(int u, int fa) {
+    if (vis[u]) return true;
+    vis[u] = 1, stk[++top] = u;
+    for (auto v : G[u]) if (v != fa)
+        if (dfs(v, u)) return true;
+    --top;
     return false;
 }
 
-ll dfs(int u, ll in) {
-    if (u == t) return in;
-    ll out = 0;
-    GO(u, cur) {
-        cur[u] = i;
-        if (e[i].w > 0 && dep[v] == dep[u] + 1) {
-            ll res = dfs(v, min(in, e[i].w));
-            e[i].w -= res, e[i ^ 1].w += res;
-            in -= res, out += res;
-        }
-        if (!in) break;
-    }
-    if (!out) dep[u] = -1;
-    return out;
-}
-
-ll dinic() {
-    ll ret = 0;
-    while (bfs()) ret += dfs(s, INF);
-    return ret;
-}
-
 int main() {
-    read(n, m, s, t);
+    read(n, m);
     FOR(i, 1, m) {
-        int u, v; ll w; read(u, v, w);
-        add(u, v, w);
+        int a, b; read(a, b);
+        ++deg[a], ++deg[b];
+        if (deg[a] > 2 || deg[b] > 2) {
+            print("No");
+            return output(), 0;
+        }
+        G[a].push_back(b), G[b].push_back(a);
     }
-    print(dinic());
+    FOR(i, 1, n) if (!vis[i] && dfs(i, 0)) {
+        print("No");
+        return output(), 0;
+    }
+    print("Yes");
     return output(), 0;
 }
 

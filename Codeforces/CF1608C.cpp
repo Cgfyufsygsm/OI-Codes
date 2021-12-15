@@ -1,7 +1,9 @@
 #include <bits/stdc++.h>
-#define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
-#define GO(u, x) for (int i = x[u], v = e[i].to; i; i = e[i].nxt, v = e[i].to)
 #define il inline
+#define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
+#define DEC(i, a, b) for (int i = (a); i >= (b); --i)
+
+using namespace std;
 
 namespace YangTY {
 namespace fastIO {
@@ -20,8 +22,8 @@ template<typename T> void read(T &n) {
 void read(char *s) {
     int p = 0;
     char c = getchar();
-    while (isspace(c)) c = getchar();
-    while (!isspace(c)) s[p++] = c, c = getchar();
+    while (!isdigit(c) && !isalpha(c)) c = getchar();
+    while (isalpha(c) || isdigit(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
@@ -80,79 +82,67 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 205, maxm = 5005;
+const int maxn = 1e5 + 5;
+vector<int> G[maxn];
+int n, a[maxn], b[maxn], a0[maxn], b0[maxn], ia[maxn], ib[maxn];
+int dfn[maxn], low[maxn], dfnClock, scc[maxn], ins[maxn], sccCnt, stk[maxn], top;
+int ind[maxn];
+int ans[maxn];
 
-typedef long long ll;
-const ll INF = 1e18;
-
-struct edge {
-    int to, nxt;
-    ll w;
-} e[maxm << 1];
-
-int head[maxn], dep[maxn], cur[maxn], cnt = 1;
-int n, m, s, t;
-
-il void add(int u, int v, int w) {
-    e[++cnt].to = v;
-    e[cnt].w = w;
-    e[cnt].nxt = head[u];
-    head[u] = cnt;
-    e[++cnt].to = u;
-    e[cnt].w = 0;
-    e[cnt].nxt = head[v];
-    head[v] = cnt;
+void tarjan(int u) {
+    dfn[u] = low[u] = ++dfnClock;
+    stk[++top] = u, ins[u] = 1;
+    for (auto v : G[u]) {
+        if (!dfn[v])
+            tarjan(v), low[u] = min(low[u], low[v]);
+        else if (ins[v])
+            low[u] = min(low[u], dfn[v]);
+    }
+    if (low[u] == dfn[u]) {
+        ++sccCnt;
+        while (true) {
+            int now = stk[top--];
+            ins[now] = 0;
+            scc[now] = sccCnt;
+            if (now == u) break;
+        }
+    }
     return;
 }
 
-bool bfs() {
-    static int q[maxn], qhead, qtail;
-    memset(dep, -1, sizeof dep);
-    memcpy(cur, head, sizeof head);
-    q[qhead = qtail = 1] = s;
-    dep[s] = 0;
-    while (qhead <= qtail) {
-        int u = q[qhead++];
-        GO(u, head) {
-            if (e[i].w > 0 && dep[v] == -1) {
-                q[++qtail] = v;
-                dep[v] = dep[u] + 1;
-                if (v == t) return true;
-            }
-        }
-    }
-    return false;
-}
-
-ll dfs(int u, ll in) {
-    if (u == t) return in;
-    ll out = 0;
-    GO(u, cur) {
-        cur[u] = i;
-        if (e[i].w > 0 && dep[v] == dep[u] + 1) {
-            ll res = dfs(v, min(in, e[i].w));
-            e[i].w -= res, e[i ^ 1].w += res;
-            in -= res, out += res;
-        }
-        if (!in) break;
-    }
-    if (!out) dep[u] = -1;
-    return out;
-}
-
-ll dinic() {
-    ll ret = 0;
-    while (bfs()) ret += dfs(s, INF);
-    return ret;
-}
-
 int main() {
-    read(n, m, s, t);
-    FOR(i, 1, m) {
-        int u, v; ll w; read(u, v, w);
-        add(u, v, w);
+    int T; read(T);
+    while (T--) {
+        read(n);
+        FOR(i, 1, n) read(a[i]), a0[i] = a[i];
+        FOR(i, 1, n) read(b[i]), b0[i] = b[i];
+        sort(a0 + 1, a0 + n + 1), sort(b0 + 1, b0 + n + 1);
+        FOR(i, 1, n) {
+            a[i] = lower_bound(a0 + 1, a0 + n + 1, a[i]) - a0;
+            b[i] = lower_bound(b0 + 1, b0 + n + 1, b[i]) - b0;
+            ia[a[i]] = i, ib[b[i]] = i;
+            G[i].clear();
+            dfn[i] = low[i] = scc[i] = ins[i] = ind[i] = ans[i] = 0;
+        }
+        FOR(i, 1, n) {
+            if (a[i] != 1)
+                G[i].push_back(ia[a[i] - 1]);
+            if (b[i] != 1)
+                G[i].push_back(ib[b[i] - 1]);
+        }
+        sccCnt = dfnClock = 0;
+        FOR(i, 1, n) if (!dfn[i]) tarjan(i);
+        FOR(i, 1, n) {
+            if (a[i] != 1 && scc[i] != scc[ia[a[i] - 1]])
+                ++ind[scc[ia[a[i] - 1]]];
+            if (b[i] != 1 && scc[i] != scc[ib[b[i] - 1]])
+                ++ind[scc[ib[b[i] - 1]]];
+        }
+        int ansid = 0;
+        FOR(i, 1, sccCnt) if (!ind[i]) ansid = i;
+        FOR(i, 1, n) putchar(scc[i] == ansid ? '1' : '0');
+        putchar('\n');
     }
-    print(dinic());
     return output(), 0;
 }
 

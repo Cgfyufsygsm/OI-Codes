@@ -145,7 +145,37 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 2e5 + 5;
+modint fac[maxn], ifac[maxn];
+int n;
+char s[maxn][5];
+
+modint binom(int n, int m) {
+    return fac[n] * ifac[n - m] * ifac[m];
+}
+
 int main() {
+    read(n);
+    fac[0] = 1;
+    FOR(i, 1, 2 * n) fac[i] = i * fac[i - 1];
+    ifac[2 * n] = qPow(fac[2 * n], mod - 2);
+    DEC(i, 2 * n - 1, 0) ifac[i] = (i + 1) * ifac[i + 1];
+    int cntb = 0, cntw = 0, cntp = 0, cntq = 0;
+    bool checkwb = 1, checkbw = 1, checksame = 1;
+    FOR(i, 1, n) {
+        read(s[i] + 1);
+        if (s[i][1] == '?' && s[i][2] == '?') ++cntp;
+        if (s[i][1] == s[i][2] && s[i][1] != '?') checksame = 0;
+        cntb += (s[i][1] == 'B') + (s[i][2] == 'B');
+        cntw += (s[i][1] == 'W') + (s[i][2] == 'W');
+        cntq += (s[i][1] == '?') + (s[i][2] == '?');
+        if (s[i][1] == 'B'|| s[i][2] == 'W') checkwb = 0;
+        if (s[i][1] == 'W'|| s[i][2] == 'B') checkbw = 0;
+    }
+    if (cntb > n || cntw > n) return print(0), output(), 0;
+    modint ans = binom(cntq, n - cntb);
+    ans -= checksame * qPow(2, cntp) - checkwb - checkbw;
+    print(ans);
     return output(), 0;
 }
 }// namespace YangTY

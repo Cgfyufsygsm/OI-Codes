@@ -23,8 +23,8 @@ template<typename T> void read(T &n) {
 void read(char *s) {
     int p = 0;
     char c = getchar();
-    while (!isdigit(c) && !isalpha(c)) c = getchar();
-    while (isalpha(c) || isdigit(c)) s[p++] = c, c = getchar();
+    while (isspace(c)) c = getchar();
+    while (!isspace(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
