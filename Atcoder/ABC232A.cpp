@@ -6,68 +6,6 @@
 using namespace std;
 
 namespace YangTY {
-
-const int mod = 998244353;
-
-struct modint {
-    typedef int INT;
-    static const INT mod = YangTY::mod;
-    INT val;
-    il void check() {
-        val >= mod ? val %= mod : true;
-        val < 0 ? (val %= mod) += mod : true;
-        return;
-    }
-    modint(INT v = 0) : val(v) {check();}
-
-    il modint &operator=(INT v) {return val = v, *this;}
-    il modint &operator+=(modint rhs) {return val = val + rhs.val >= mod ? val + rhs.val - mod : val + rhs.val, *this;}
-    il modint &operator-=(modint rhs) {return val = val - rhs.val < 0 ? val - rhs.val + mod : val - rhs.val, *this;}
-    il modint &operator*=(modint rhs) {return val = 1ll * val * rhs.val % mod, *this;}
-
-    il friend modint operator+(const modint &lhs, const modint &rhs) {return modint(lhs) += rhs;}
-    il friend modint operator-(const modint &lhs, const modint &rhs) {return modint(lhs) -= rhs;}
-    il friend modint operator*(const modint &lhs, const modint &rhs) {return modint(lhs) *= rhs;}
-    il friend bool operator==(const modint &lhs, const modint &rhs) {return lhs.val == rhs.val;}
-    il friend bool operator!=(const modint &lhs, const modint &rhs) {return lhs.val != rhs.val;}
-    il friend bool operator>(const modint &lhs, const modint &rhs) {return lhs.val > rhs.val;}
-    il friend bool operator<(const modint &lhs, const modint &rhs) {return lhs.val < rhs.val;}
-    il friend bool operator>=(const modint &lhs, const modint &rhs) {return lhs.val >= rhs.val;}
-    il friend bool operator<=(const modint &lhs, const modint &rhs) {return lhs.val <= rhs.val;}
-
-    il modint &operator++() {
-        ++val;
-        if (val == mod) val = 0;
-        return *this;
-    }
-    il modint &operator--() {
-        if (val == 0) val = mod;
-        --val;
-        return *this;
-    }
-    il modint operator++(int) {
-        modint ret = *this;
-        ++*this;
-        return ret;
-    }
-    il modint operator--(int) {
-        modint ret = *this;
-        --*this;
-        return ret;
-    }
-
-    il modint operator+() const {return *this;}
-    il modint operator-() const {return modint() - *this;}
-};
-
-modint qPow(modint base, modint exp) {
-    base.check();
-    modint ret = 1;
-    for (auto p = exp.val; p; p >>= 1, base *= base)
-        if (p & 1) ret *= base;
-    return ret;
-}
-
 namespace fastIO {
 const int maxc = 1 << 23;
 char ibuf[maxc], *__p1 = ibuf, *__p2 = ibuf;
@@ -85,7 +23,7 @@ void read(char *s) {
     int p = 0;
     char c = getchar();
     while (isspace(c)) c = getchar();
-    while (~c && !isspace(c)) s[p++] = c, c = getchar();
+    while (!isspace(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
@@ -115,7 +53,6 @@ void print(const char *s, char c = '\n') {
     putchar(c);
     return;
 }
-il void print(modint x, char c = '\n') {print(x.val, c);}
 template<typename T1, typename... T2> il void print(T1 a, T2... x) {
     if (!sizeof...(x)) print(a);
     else print(a, ' '), print(x...);
@@ -145,10 +82,15 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+char s[4];
+
 int main() {
+    read(s + 1);
+    print((s[1] - '0') * (s[3] - '0'));
     return output(), 0;
 }
-}// namespace YangTY
+
+} // namespace YangTY
 
 int main() {
     YangTY::main();

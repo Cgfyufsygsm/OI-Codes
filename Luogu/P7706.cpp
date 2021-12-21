@@ -6,68 +6,6 @@
 using namespace std;
 
 namespace YangTY {
-
-const int mod = 998244353;
-
-struct modint {
-    typedef int INT;
-    static const INT mod = YangTY::mod;
-    INT val;
-    il void check() {
-        val >= mod ? val %= mod : true;
-        val < 0 ? (val %= mod) += mod : true;
-        return;
-    }
-    modint(INT v = 0) : val(v) {check();}
-
-    il modint &operator=(INT v) {return val = v, *this;}
-    il modint &operator+=(modint rhs) {return val = val + rhs.val >= mod ? val + rhs.val - mod : val + rhs.val, *this;}
-    il modint &operator-=(modint rhs) {return val = val - rhs.val < 0 ? val - rhs.val + mod : val - rhs.val, *this;}
-    il modint &operator*=(modint rhs) {return val = 1ll * val * rhs.val % mod, *this;}
-
-    il friend modint operator+(const modint &lhs, const modint &rhs) {return modint(lhs) += rhs;}
-    il friend modint operator-(const modint &lhs, const modint &rhs) {return modint(lhs) -= rhs;}
-    il friend modint operator*(const modint &lhs, const modint &rhs) {return modint(lhs) *= rhs;}
-    il friend bool operator==(const modint &lhs, const modint &rhs) {return lhs.val == rhs.val;}
-    il friend bool operator!=(const modint &lhs, const modint &rhs) {return lhs.val != rhs.val;}
-    il friend bool operator>(const modint &lhs, const modint &rhs) {return lhs.val > rhs.val;}
-    il friend bool operator<(const modint &lhs, const modint &rhs) {return lhs.val < rhs.val;}
-    il friend bool operator>=(const modint &lhs, const modint &rhs) {return lhs.val >= rhs.val;}
-    il friend bool operator<=(const modint &lhs, const modint &rhs) {return lhs.val <= rhs.val;}
-
-    il modint &operator++() {
-        ++val;
-        if (val == mod) val = 0;
-        return *this;
-    }
-    il modint &operator--() {
-        if (val == 0) val = mod;
-        --val;
-        return *this;
-    }
-    il modint operator++(int) {
-        modint ret = *this;
-        ++*this;
-        return ret;
-    }
-    il modint operator--(int) {
-        modint ret = *this;
-        --*this;
-        return ret;
-    }
-
-    il modint operator+() const {return *this;}
-    il modint operator-() const {return modint() - *this;}
-};
-
-modint qPow(modint base, modint exp) {
-    base.check();
-    modint ret = 1;
-    for (auto p = exp.val; p; p >>= 1, base *= base)
-        if (p & 1) ret *= base;
-    return ret;
-}
-
 namespace fastIO {
 const int maxc = 1 << 23;
 char ibuf[maxc], *__p1 = ibuf, *__p2 = ibuf;
@@ -85,7 +23,7 @@ void read(char *s) {
     int p = 0;
     char c = getchar();
     while (isspace(c)) c = getchar();
-    while (~c && !isspace(c)) s[p++] = c, c = getchar();
+    while (!isspace(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
@@ -115,7 +53,6 @@ void print(const char *s, char c = '\n') {
     putchar(c);
     return;
 }
-il void print(modint x, char c = '\n') {print(x.val, c);}
 template<typename T1, typename... T2> il void print(T1 a, T2... x) {
     if (!sizeof...(x)) print(a);
     else print(a, ' '), print(x...);
@@ -145,10 +82,88 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 5e5 + 5;
+
+int a[maxn], b[maxn];
+
+struct node {
+    int maxa, minb, val1, val2, ans;
+    node() {maxa = val1 = val2 = ans = -1e9, minb = 1e9;}
+} t[maxn << 2];
+
+//val1  : max(ai - bj) i < j
+// val2 : max(ai - bj) i > j
+
+#define L (k << 1)
+#define R (L | 1)
+#define M ((i + j) >> 1)
+
+node operator+(const node &a, const node &b) {
+    node res;
+    res.maxa = max(a.maxa, b.maxa);
+    res.minb = min(a.minb, b.minb);
+    res.val1 = max(a.val1, b.val1, a.maxa - b.minb);
+    res.val2 = max(a.val2, b.val2, b.maxa - a.minb);
+    res.ans = max(a.ans, b.ans, a.maxa + b.val2, b.maxa + a.val1);
+    return res;
+}
+
+void build(int i, int j, int k) {
+    if (i == j) {
+        t[k].maxa = a[i], t[k].minb = b[i];
+        return;
+    }
+    build(i, M, L), build(M + 1, j, R);
+    t[k] = t[L] + t[R];
+    return;
+}
+
+void modify1(int i, int j, int k, int x, int v) {
+    if (i == j) {
+        t[k].maxa = v;
+        return;
+    }
+    if (x <= M) modify1(i, M, L, x, v);
+    else modify1(M + 1, j, R, x, v);
+    t[k] = t[L] + t[R];
+    return;
+}
+
+void modify2(int i, int j, int k, int x, int v) {
+    if (i == j) {
+        t[k].minb = v;
+        return;
+    }
+    if (x <= M) modify2(i, M, L, x, v);
+    else modify2(M + 1, j, R, x, v);
+    t[k] = t[L] + t[R];
+    return;
+}
+
+node query(int i, int j, int k, int x, int y) {
+    if (x <= i && y >= j) {
+        return t[k];
+    }
+    if (y <= M) return query(i, M, L, x, y);
+    if (x > M) return query(M + 1, j, R, x, y);
+    return query(i, M, L, x, y) + query(M + 1, j, R, x, y);
+}
+
 int main() {
+    int n, m; read(n, m);
+    FOR(i, 1, n) read(a[i]);
+    FOR(i, 1, n) read(b[i]);
+    build(1, n, 1);
+    while (m--) {
+        int op, x, y; read(op, x, y);
+        if (op == 1) modify1(1, n, 1, x, y);
+        else if (op == 2) modify2(1, n, 1, x, y);
+        else print(query(1, n, 1, x, y).ans);
+    }
     return output(), 0;
 }
-}// namespace YangTY
+
+} // namespace YangTY
 
 int main() {
     YangTY::main();

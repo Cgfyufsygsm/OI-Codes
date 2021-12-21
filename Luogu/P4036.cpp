@@ -6,68 +6,6 @@
 using namespace std;
 
 namespace YangTY {
-
-const int mod = 998244353;
-
-struct modint {
-    typedef int INT;
-    static const INT mod = YangTY::mod;
-    INT val;
-    il void check() {
-        val >= mod ? val %= mod : true;
-        val < 0 ? (val %= mod) += mod : true;
-        return;
-    }
-    modint(INT v = 0) : val(v) {check();}
-
-    il modint &operator=(INT v) {return val = v, *this;}
-    il modint &operator+=(modint rhs) {return val = val + rhs.val >= mod ? val + rhs.val - mod : val + rhs.val, *this;}
-    il modint &operator-=(modint rhs) {return val = val - rhs.val < 0 ? val - rhs.val + mod : val - rhs.val, *this;}
-    il modint &operator*=(modint rhs) {return val = 1ll * val * rhs.val % mod, *this;}
-
-    il friend modint operator+(const modint &lhs, const modint &rhs) {return modint(lhs) += rhs;}
-    il friend modint operator-(const modint &lhs, const modint &rhs) {return modint(lhs) -= rhs;}
-    il friend modint operator*(const modint &lhs, const modint &rhs) {return modint(lhs) *= rhs;}
-    il friend bool operator==(const modint &lhs, const modint &rhs) {return lhs.val == rhs.val;}
-    il friend bool operator!=(const modint &lhs, const modint &rhs) {return lhs.val != rhs.val;}
-    il friend bool operator>(const modint &lhs, const modint &rhs) {return lhs.val > rhs.val;}
-    il friend bool operator<(const modint &lhs, const modint &rhs) {return lhs.val < rhs.val;}
-    il friend bool operator>=(const modint &lhs, const modint &rhs) {return lhs.val >= rhs.val;}
-    il friend bool operator<=(const modint &lhs, const modint &rhs) {return lhs.val <= rhs.val;}
-
-    il modint &operator++() {
-        ++val;
-        if (val == mod) val = 0;
-        return *this;
-    }
-    il modint &operator--() {
-        if (val == 0) val = mod;
-        --val;
-        return *this;
-    }
-    il modint operator++(int) {
-        modint ret = *this;
-        ++*this;
-        return ret;
-    }
-    il modint operator--(int) {
-        modint ret = *this;
-        --*this;
-        return ret;
-    }
-
-    il modint operator+() const {return *this;}
-    il modint operator-() const {return modint() - *this;}
-};
-
-modint qPow(modint base, modint exp) {
-    base.check();
-    modint ret = 1;
-    for (auto p = exp.val; p; p >>= 1, base *= base)
-        if (p & 1) ret *= base;
-    return ret;
-}
-
 namespace fastIO {
 const int maxc = 1 << 23;
 char ibuf[maxc], *__p1 = ibuf, *__p2 = ibuf;
@@ -85,7 +23,7 @@ void read(char *s) {
     int p = 0;
     char c = getchar();
     while (isspace(c)) c = getchar();
-    while (~c && !isspace(c)) s[p++] = c, c = getchar();
+    while (!isspace(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
@@ -115,7 +53,6 @@ void print(const char *s, char c = '\n') {
     putchar(c);
     return;
 }
-il void print(modint x, char c = '\n') {print(x.val, c);}
 template<typename T1, typename... T2> il void print(T1 a, T2... x) {
     if (!sizeof...(x)) print(a);
     else print(a, ' '), print(x...);
@@ -145,10 +82,107 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+using uint = unsigned;
+const int maxn = 1e5 + 5;
+const uint base = 31;
+char s0[maxn];
+uint p[maxn];
+
+struct node {
+    int key, size, ch[2], val;
+    uint hash;
+} t[maxn];
+int cnt, root;
+
+#define ls(u) t[u].ch[0]
+#define rs(u) t[u].ch[1]
+
+void pushup(int u) {
+    t[u].size = t[ls(u)].size + t[rs(u)].size + 1;
+    t[u].hash = t[ls(u)].hash + t[u].val * p[t[ls(u)].size] + t[rs(u)].hash * p[t[ls(u)].size + 1];
+    return;
+}
+
+void split(int u, int sz, int &x, int &y) {
+    if (!u) return x = y = 0, void();
+    if (t[ls(u)].size < sz) x = u, split(rs(u), sz - t[ls(u)].size - 1, rs(u), y);
+    else y = u, split(ls(u), sz, x, ls(u));
+    return pushup(u), void();
+}
+
+int merge(int x, int y) {
+    if (!x || !y) return x + y;
+    if (t[x].key < t[y].key)
+        return t[x].ch[1] = merge(t[x].ch[1], y), pushup(x), x;
+    else return t[y].ch[0] = merge(x, t[y].ch[0]), pushup(y), y;
+}
+
+void insert(int pos, char c) {
+    int x, y;
+    split(root, pos, x, y);
+    ++cnt;
+    t[cnt].val = t[cnt].hash = c - 'a' + 1, t[cnt].size = 1, t[cnt].key = rand();
+    root = merge(x, merge(cnt, y));
+    return;
+}
+
+void modify(int pos, char c) {
+    int x, y, z;
+    split(root, pos - 1, x, y), split(y, 1, y, z);
+    t[y].val = t[y].hash = c - 'a' + 1;
+    root = merge(x, merge(y, z));
+    return;
+}
+
+void build() {
+    int n = strlen(s0 + 1);
+    FOR(i, 1, n) insert(i - 1, s0[i]);
+    return;
+}
+
+uint gethash(int l, int r) {
+    int x, y, z;
+    split(root, l - 1, x, y), split(y, r - l + 1, y, z);
+    uint res = t[y].hash;
+    root = merge(x, merge(y, z));
+    return res;
+}
+
+int solve(int pos1, int pos2) {
+    int l = 0, r = min(t[root].size - pos2 + 1, t[root].size - pos1 + 1) + 1, res = 0;
+    while (l < r) {
+        int mid = (l + r) >> 1;
+        uint h1 = gethash(pos1, pos1 + mid - 1), h2 = gethash(pos2, pos2 + mid - 1);
+        if (h1 == h2) res = mid, l = mid + 1;
+        else r = mid;
+    }
+    return res;
+}
+
 int main() {
+    p[0] = 1;
+    FOR(i, 1, maxn - 1) p[i] = p[i - 1] * base;
+    read(s0 + 1);
+    build();
+    int m; read(m);
+    while (m--) {
+        char s[2], d[2]; read(s);
+        int x, y;
+        if (s[0] == 'Q') {
+            read(x, y);
+            print(solve(x, y));
+        } else if (s[0] == 'R') {
+            read(x, d);
+            modify(x, d[0]);
+        } else if (s[0] == 'I') {
+            read(x, d);
+            insert(x, d[0]);
+        }
+    }
     return output(), 0;
 }
-}// namespace YangTY
+
+} // namespace YangTY
 
 int main() {
     YangTY::main();

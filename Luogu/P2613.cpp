@@ -7,7 +7,7 @@ using namespace std;
 
 namespace YangTY {
 
-const int mod = 998244353;
+const int mod = 19260817;
 
 struct modint {
     typedef int INT;
@@ -69,7 +69,7 @@ modint qPow(modint base, modint exp) {
 }
 
 namespace fastIO {
-const int maxc = 1 << 23;
+const int maxc = 1 << 25;
 char ibuf[maxc], *__p1 = ibuf, *__p2 = ibuf;
 il char getchar() {return __p1 == __p2 && (__p2 = (__p1 = ibuf) + fread(ibuf, 1, maxc, stdin), __p1 == __p2) ? EOF : *__p1++;}
 template<typename T> void read(T &n) {
@@ -145,7 +145,18 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 100005;
+char a[maxn], b[maxn];
+int n1, n2;
+
 int main() {
+    read(a + 1), read(b + 1);
+    n1 = strlen(a + 1), n2 = strlen(b + 1);
+    modint x = 0, y = 0;
+    FOR(i, 1, n1) x = 10 * x + a[i] - '0';
+    FOR(i, 1, n2) y = 10 * y + b[i] - '0';
+    if (y == 0) print("Angry!");
+    else print(x * qPow(y, mod - 2));
     return output(), 0;
 }
 }// namespace YangTY

@@ -6,68 +6,6 @@
 using namespace std;
 
 namespace YangTY {
-
-const int mod = 998244353;
-
-struct modint {
-    typedef int INT;
-    static const INT mod = YangTY::mod;
-    INT val;
-    il void check() {
-        val >= mod ? val %= mod : true;
-        val < 0 ? (val %= mod) += mod : true;
-        return;
-    }
-    modint(INT v = 0) : val(v) {check();}
-
-    il modint &operator=(INT v) {return val = v, *this;}
-    il modint &operator+=(modint rhs) {return val = val + rhs.val >= mod ? val + rhs.val - mod : val + rhs.val, *this;}
-    il modint &operator-=(modint rhs) {return val = val - rhs.val < 0 ? val - rhs.val + mod : val - rhs.val, *this;}
-    il modint &operator*=(modint rhs) {return val = 1ll * val * rhs.val % mod, *this;}
-
-    il friend modint operator+(const modint &lhs, const modint &rhs) {return modint(lhs) += rhs;}
-    il friend modint operator-(const modint &lhs, const modint &rhs) {return modint(lhs) -= rhs;}
-    il friend modint operator*(const modint &lhs, const modint &rhs) {return modint(lhs) *= rhs;}
-    il friend bool operator==(const modint &lhs, const modint &rhs) {return lhs.val == rhs.val;}
-    il friend bool operator!=(const modint &lhs, const modint &rhs) {return lhs.val != rhs.val;}
-    il friend bool operator>(const modint &lhs, const modint &rhs) {return lhs.val > rhs.val;}
-    il friend bool operator<(const modint &lhs, const modint &rhs) {return lhs.val < rhs.val;}
-    il friend bool operator>=(const modint &lhs, const modint &rhs) {return lhs.val >= rhs.val;}
-    il friend bool operator<=(const modint &lhs, const modint &rhs) {return lhs.val <= rhs.val;}
-
-    il modint &operator++() {
-        ++val;
-        if (val == mod) val = 0;
-        return *this;
-    }
-    il modint &operator--() {
-        if (val == 0) val = mod;
-        --val;
-        return *this;
-    }
-    il modint operator++(int) {
-        modint ret = *this;
-        ++*this;
-        return ret;
-    }
-    il modint operator--(int) {
-        modint ret = *this;
-        --*this;
-        return ret;
-    }
-
-    il modint operator+() const {return *this;}
-    il modint operator-() const {return modint() - *this;}
-};
-
-modint qPow(modint base, modint exp) {
-    base.check();
-    modint ret = 1;
-    for (auto p = exp.val; p; p >>= 1, base *= base)
-        if (p & 1) ret *= base;
-    return ret;
-}
-
 namespace fastIO {
 const int maxc = 1 << 23;
 char ibuf[maxc], *__p1 = ibuf, *__p2 = ibuf;
@@ -85,7 +23,7 @@ void read(char *s) {
     int p = 0;
     char c = getchar();
     while (isspace(c)) c = getchar();
-    while (~c && !isspace(c)) s[p++] = c, c = getchar();
+    while (!isspace(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
@@ -115,7 +53,6 @@ void print(const char *s, char c = '\n') {
     putchar(c);
     return;
 }
-il void print(modint x, char c = '\n') {print(x.val, c);}
 template<typename T1, typename... T2> il void print(T1 a, T2... x) {
     if (!sizeof...(x)) print(a);
     else print(a, ' '), print(x...);
@@ -145,10 +82,63 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 2e5 + 5;
+using ll = long long;
+int n, m, a[maxn], b[maxn], val[maxn * 2];
+int head[maxn * 3], cnt;
+
+struct edge {
+    int to, nxt;
+    ll w;
+} e[maxn * 7];
+
+il void add(int u, int v, ll w) {
+    e[++cnt].to = v;
+    e[cnt].w = w;
+    e[cnt].nxt = head[u];
+    head[u] = cnt;
+    return;
+}
+
+ll dijkstra(int s, int t) {
+    static ll dis[maxn * 3];
+    static bool vis[maxn * 3];
+    using pli = pair<ll, int>;
+    priority_queue<pli, vector<pli>, greater<pli> > q;
+    memset(dis, 0x3f, sizeof dis);
+    dis[s] = 0, q.push(pli(0, s));
+    while (!q.empty()) {
+        int u = q.top().second;
+        q.pop();
+        if (!vis[u]) {
+            vis[u] = 1;
+            for (int i = head[u]; i; i = e[i].nxt) {
+                int v = e[i].to;
+                if (dis[u] + e[i].w < dis[v]) {
+                    dis[v] = dis[u] + e[i].w;
+                    q.push(pli(dis[v], v));
+                }
+            }
+        }
+    }
+    return dis[t];
+}
+
 int main() {
+    read(n, m);
+    FOR(i, 1, n) read(a[i]), val[i] = m - a[i];
+    FOR(i, 1, n) read(b[i]), val[i + n] = b[i];
+    sort(val + 1, val + 2 * n + 1);
+    int tot = unique(val + 1, val + 2 * n + 1) - val - 1;
+    FOR(i, 1, tot - 1) add(n + i, n + i + 1, val[i + 1] - val[i]);
+    add(n + tot, n + 1, (val[1] - val[tot] + m) % m);
+    FOR(i, 1, n) add(i, n + lower_bound(val + 1, val + tot + 1, m - a[i]) - val, 0);
+    FOR(i, 1, n) add(n + lower_bound(val + 1, val + tot + 1, b[i]) - val, i, 0);
+    print(dijkstra(1, n));
     return output(), 0;
 }
-}// namespace YangTY
+
+} // namespace YangTY
 
 int main() {
     YangTY::main();

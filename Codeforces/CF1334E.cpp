@@ -85,7 +85,7 @@ void read(char *s) {
     int p = 0;
     char c = getchar();
     while (isspace(c)) c = getchar();
-    while (~c && !isspace(c)) s[p++] = c, c = getchar();
+    while (!isspace(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
@@ -115,7 +115,7 @@ void print(const char *s, char c = '\n') {
     putchar(c);
     return;
 }
-il void print(modint x, char c = '\n') {print(x.val, c);}
+il void print(modint x) {print(x.val);}
 template<typename T1, typename... T2> il void print(T1 a, T2... x) {
     if (!sizeof...(x)) print(a);
     else print(a, ' '), print(x...);
@@ -145,7 +145,45 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+using ll = long long;
+ll D, p[105];
+modint fac[105], ifac[105];
+int q, cnt;
+
+il ll gcd(ll a, ll b) {return !b ? a : gcd(b, a % b);}
+
+modint calc(ll x) {
+    vector<ll> v;
+    int sum = 0;
+    FOR(i, 1, cnt) {
+        if (x % p[i]) continue;
+        int tmp = 0;
+        while (x % p[i] == 0) x /= p[i], ++tmp;
+        sum += tmp, v.push_back(tmp);
+    }
+    modint ans = fac[sum];
+    for (auto y : v) ans *= ifac[y];
+    return ans;
+}
+
 int main() {
+    read(D);
+    fac[0] = 1;
+    FOR(i, 1, 100) fac[i] = i * fac[i - 1];
+    ifac[100] = qPow(fac[100], mod - 2);
+    DEC(i, 100 - 1, 0) ifac[i] = (i + 1) * ifac[i + 1];
+    for (int i = 2; 1ll * i * i <= D; ++i) {
+        if (D % i) continue;
+        p[++cnt] = i;
+        while (D % i == 0) D /= i;
+    }
+    if (D > 1) p[++cnt] = D;
+    read(q);
+    while (q--) {
+        ll u, v; read(u, v);
+        ll g = gcd(u, v);
+        print(calc(u / g) * calc(v / g));
+    }
     return output(), 0;
 }
 }// namespace YangTY

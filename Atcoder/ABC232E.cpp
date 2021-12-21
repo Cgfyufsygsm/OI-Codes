@@ -85,7 +85,7 @@ void read(char *s) {
     int p = 0;
     char c = getchar();
     while (isspace(c)) c = getchar();
-    while (~c && !isspace(c)) s[p++] = c, c = getchar();
+    while (!isspace(c)) s[p++] = c, c = getchar();
     return;
 }
 template<typename T1, typename... T2> void read(T1 &a, T2&... x) {
@@ -115,7 +115,7 @@ void print(const char *s, char c = '\n') {
     putchar(c);
     return;
 }
-il void print(modint x, char c = '\n') {print(x.val, c);}
+il void print(modint x) {print(x.val);}
 template<typename T1, typename... T2> il void print(T1 a, T2... x) {
     if (!sizeof...(x)) print(a);
     else print(a, ' '), print(x...);
@@ -145,7 +145,40 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxk = 1e6 + 5;
+modint fac[maxk], ifac[maxk], f[2][2][maxk];
+int h, w, k, x1, y1, x2, y2;
+
+void proc() {
+    const int N = 1e6;
+    fac[0] = 1;
+    FOR(i, 1, N) fac[i] = i * fac[i - 1];
+    ifac[N] = qPow(fac[N], mod - 2);
+    DEC(i, N - 1, 0) ifac[i] = ifac[i + 1] * (i + 1);
+    return;
+}
+
+modint binom(int n, int m) {
+    return fac[n] * ifac[m] * ifac[n - m];
+}
+
 int main() {
+    proc();
+    read(h, w, k);
+    read(x1, y1, x2, y2);
+    f[0][1][0] = 1;
+    FOR(i, 1, k) {
+        f[0][0][i] = f[0][1][i - 1] + (h - 2) * f[0][0][i - 1];
+        f[0][1][i] = (h - 1) * f[0][0][i - 1];
+    }
+    f[1][1][0] = 1;
+    FOR(i, 1, k) {
+        f[1][0][i] = f[1][1][i - 1] + (w - 2) * f[1][0][i - 1];
+        f[1][1][i] = 1LL * (w - 1) * f[1][0][i - 1];
+    }
+    modint ans = 0;
+    FOR(i, 0, k) ans += binom(k, i) * f[0][x1 == x2][i] * f[1][y1 == y2][k - i];
+    print(ans);
     return output(), 0;
 }
 }// namespace YangTY
