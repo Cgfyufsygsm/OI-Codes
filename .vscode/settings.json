@@ -76,7 +76,10 @@
         "utility": "cpp",
         "typeindex": "cpp",
         "typeinfo": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "barrier": "cpp",
+        "latch": "cpp",
+        "semaphore": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++14",
     "C_Cpp.errorSquiggles": "Enabled"
