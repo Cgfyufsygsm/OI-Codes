@@ -74,8 +74,8 @@ template<typename T, typename...Args> il T min(const T &a, const Args&... args) 
     T res = min(args...);
     return min(a, res);
 }
-template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
-template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
+template<typename T> il T chkmax(T &a, const T &b) {return a = (b > a ? b : a);}
+template<typename T> il T chkmin(T &a, const T &b) {return a = (b < a ? b : a);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
 template<typename T> il void myswap(T &a, T &b) {
     T t = a;

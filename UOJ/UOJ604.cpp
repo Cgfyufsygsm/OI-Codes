@@ -1,7 +1,9 @@
 #include <bits/stdc++.h>
-#define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
-#define GO(u, x) for (int i = x[u], v = e[i].to; i; i = e[i].nxt, v = e[i].to)
 #define il inline
+#define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
+#define DEC(i, a, b) for (int i = (a); i >= (b); --i)
+
+using namespace std;
 
 namespace YangTY {
 namespace fastIO {
@@ -71,8 +73,8 @@ template<typename T, typename...Args> il T min(const T &a, const Args&... args) 
     T res = min(args...);
     return min(a, res);
 }
-template<typename T> il T chkmax(T &a, const T &b) {return a = (b > a ? b : a);}
-template<typename T> il T chkmin(T &a, const T &b) {return a = (b < a ? b : a);}
+template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
+template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
 template<typename T> il void myswap(T &a, T &b) {
     T t = a;
@@ -80,79 +82,38 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 205, maxm = 5005;
+using ll = long long;
+const int maxn = 505;
+int n;
+struct Point {
+    int x, y;
+    Point() {}
+    Point(int _x, int _y) : x(_x), y(_y) {}
+    friend Point operator-(const Point &a, const Point &b) {return Point(a.x - b.x, a.y - b.y);}
+    friend ll operator^(const Point &a, const Point &b) {return 1ll * a.x * b.y - 1ll * a.y * b.x;}
+} p[maxn];
 
-typedef long long ll;
-const ll INF = 1e18;
+bool check(int a, int b, int c) {return ((p[b] - p[a]) ^ (p[c] - p[a])) > 0;}
 
-struct edge {
-    int to, nxt;
-    ll w;
-} e[maxm << 1];
-
-int head[maxn], dep[maxn], cur[maxn], cnt = 1;
-int n, m, s, t;
-
-il void add(int u, int v, int w) {
-    e[++cnt].to = v;
-    e[cnt].w = w;
-    e[cnt].nxt = head[u];
-    head[u] = cnt;
-    e[++cnt].to = u;
-    e[cnt].w = 0;
-    e[cnt].nxt = head[v];
-    head[v] = cnt;
+void solve(int s, int t, vector<int> v) {
+    vector<int> a[2];
+    for (int i = 1; i < (int)v.size(); ++i) a[check(s, v[0], v[i])].push_back(v[i]);
+    int k = check(s, v[0], t);
+    if (a[k ^ 1].size()) solve(s, v[0], a[k ^ 1]);
+    print(v[0], ' ');
+    if (a[k].size()) solve(v[0], t, a[k]);
     return;
 }
 
-bool bfs() {
-    static int q[maxn], qhead, qtail;
-    memset(dep, -1, sizeof dep);
-    memcpy(cur, head, sizeof head);
-    q[qhead = qtail = 1] = s;
-    dep[s] = 0;
-    while (qhead <= qtail) {
-        int u = q[qhead++];
-        GO(u, head) {
-            if (e[i].w > 0 && dep[v] == -1) {
-                q[++qtail] = v;
-                dep[v] = dep[u] + 1;
-                if (v == t) return true;
-            }
-        }
-    }
-    return false;
-}
-
-ll dfs(int u, ll in) {
-    if (u == t) return in;
-    ll out = 0;
-    GO(u, cur) {
-        cur[u] = i;
-        if (e[i].w > 0 && dep[v] == dep[u] + 1) {
-            ll res = dfs(v, min(in, e[i].w));
-            e[i].w -= res, e[i ^ 1].w += res;
-            in -= res, out += res;
-        }
-        if (!in) break;
-    }
-    if (!out) dep[u] = -1;
-    return out;
-}
-
-ll dinic() {
-    ll ret = 0;
-    while (bfs()) ret += dfs(s, INF);
-    return ret;
-}
-
 int main() {
-    read(n, m, s, t);
-    FOR(i, 1, m) {
-        int u, v; ll w; read(u, v, w);
-        add(u, v, w);
+    int T; read(T);
+    while (T--) {
+        read(n);
+        FOR(i, 1, n) read(p[i].x, p[i].y);
+        vector<int> tmp;
+        FOR(i, 2, n - 1) tmp.push_back(i);
+        print(1, ' '), solve(1, n, tmp), print(n, ' ');
     }
-    print(dinic());
     return output(), 0;
 }
 
