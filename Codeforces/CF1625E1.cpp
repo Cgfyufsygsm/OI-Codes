@@ -73,8 +73,8 @@ template<typename T, typename...Args> il T min(const T &a, const Args&... args) 
     T res = min(args...);
     return min(a, res);
 }
-template<typename T> il T chkmax(T &a, const T &b) {return a = max(a, b);}
-template<typename T> il T chkmin(T &a, const T &b) {return a = min(a, b);}
+template<typename T> il T chkmax(T &a, const T &b) {return a = (b > a ? b : a);}
+template<typename T> il T chkmin(T &a, const T &b) {return a = (b < a ? b : a);}
 template<typename T> il T myabs(const T &a) {return a >= 0 ? a : -a;}
 template<typename T> il void myswap(T &a, T &b) {
     T t = a;
@@ -82,29 +82,23 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 1005;
-int n, vis[maxn][maxn], a[maxn][maxn];
-
-const int fx[] = {1, -1, 0 ,0};
-const int fy[] = {0 ,0, -1, 1};
+using ll = long long;
+const int maxn = 3e5 + 5;
+int stk[maxn], top, n, q;
+ll p[maxn], sum[maxn];
+char s[maxn];
 
 int main() {
-    int T; read(T);
-    while (T--) {
-        read(n);
-        int ans = 0;
-        FOR(i, 1, n) FOR(j, 1, n) read(a[i][j]), vis[i][j] = 0;
-        FOR(i, 2, n) FOR(j, 1, n) {
-            if (!vis[i - 1][j]) {
-                ans ^= a[i][j];
-                for (int k = 0; k < 4; ++k) {
-                    int tx = i + fx[k], ty = j + fy[k];
-                    if (tx < 1 || ty < 1 || tx > n || ty > n) continue;
-                    vis[tx][ty] ^= 1;
-                }
-            }
-        }
-        print(ans);
+    read(n, q);
+    read(s + 1);
+    FOR(i, 1, n) {
+        if (s[i] == '(') stk[++top] = i;
+        else if (top) p[i] = p[stk[top--] - 1] + 1;
+    }
+    FOR(i, 1, n) sum[i] = p[i] + sum[i - 1];
+    while (q--) {
+        int t, l, r; read(t, l, r);
+        print(sum[r] - sum[l] - p[l - 1] * (p[r] - p[l - 1]));
     }
     return output(), 0;
 }
