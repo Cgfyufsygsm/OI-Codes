@@ -82,42 +82,82 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using ll = long long;
-using pli = pair<ll, int>;
-const int maxn = 2e5 + 5;
-struct edge {
-    int to; ll w;
-    edge(int v = 0, ll dis = 0) : to(v), w(dis) {}
-};
-vector<edge> G[maxn];
-int h[maxn], n, m, vis[maxn];
-ll dis[maxn];
+const int maxn = 3e3 + 5, maxm = 1e4 + 5;
 
-int main() {
-    read(n, m);
-    FOR(i, 1, n) read(h[i]), dis[i] = 2e18;
-    FOR(i, 1, m) {
-        int u, v; read(u, v);
-        G[u].push_back(edge(v, max(h[v] - h[u], 0)));
-        G[v].push_back(edge(u, max(h[u] - h[v], 0)));
+using ll = long long;
+int head[maxn], cnte, n, m, cntq[maxn], inq[maxn], vis[maxn];
+ll dis[maxn], h[maxn];
+struct edge {
+    int to, nxt;
+    ll w;
+} e[maxm];
+
+il void add(int u, int v, ll w) {
+    e[++cnte].to = v;
+    e[cnte].w = w;
+    e[cnte].nxt = head[u];
+    head[u] = cnte;
+    return;
+}
+
+bool SPFA(int s) {
+    memset(h, 0x3f, sizeof h);
+    h[s] = 0, cntq[s] = inq[s] = 1;
+    queue<int> q; q.push(s);
+    while (!q.empty()) {
+        int u = q.front(); q.pop(), inq[u] = 0;
+        for (int i = head[u]; i; i = e[i].nxt) {
+            int v = e[i].to;
+            if (h[u] + e[i].w < h[v]) {
+                h[v] = h[u] + e[i].w;
+                if (!inq[v]) {
+                    q.push(v), inq[v] = 1, ++cntq[v];
+                    if (cntq[v] > n) return 0;
+                }
+            }
+        }
     }
-    priority_queue<pli, vector<pli>, greater<pli>> q;
-    dis[1] = 0, q.push({0, 1});
-    ll ans = -4e18;
+    return 1;
+}
+
+void Dijkstra(int s) {
+    FOR(i, 1, n) dis[i] = 1e9, vis[i] = 0;
+    dis[s] = 0;
+    using pli = pair<ll, int>;
+    priority_queue<pli, vector<pli>, greater<pli> > q;
+    q.push(pli(0, s));
     while (!q.empty()) {
         int u = q.top().second; q.pop();
         if (vis[u]) continue;
         vis[u] = 1;
-        chkmax(ans, -dis[u] + h[1] - h[u]);
-        for (auto &e : G[u]) {
-            int v = e.to;
-            if (dis[u] + e.w < dis[v]) {
-                dis[v] = dis[u] + e.w;
-                q.push({dis[v], v});
+        for (int i = head[u]; i; i = e[i].nxt) {
+            int v = e[i].to;
+            if (dis[u] + e[i].w < dis[v]) {
+                dis[v] = dis[u] + e[i].w;
+                if (!vis[v]) q.push(pli(dis[v], v));
             }
         }
     }
-    print(ans);
+    return;
+}
+
+int main() {
+    read(n, m);
+    FOR(i, 1, m) {
+        int u, v, w; read(u, v, w);
+        add(u, v, w);
+    }
+    FOR(i, 1, n) add(0, i, 0);
+    if (!SPFA(0)) print(-1);
+    else {
+        FOR(u, 1, n) for (int i = head[u]; i; i = e[i].nxt) e[i].w += h[u] - h[e[i].to];
+        FOR(u, 1, n) {
+            Dijkstra(u);
+            ll ans = 0;
+            FOR(i, 1, n) ans += dis[i] == 1e9 ? i * 1e9 : i * (dis[i] + h[i] - h[u]);
+            print(ans);
+        }
+    }
     return output(), 0;
 }
 
