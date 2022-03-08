@@ -80,7 +80,12 @@
         "barrier": "cpp",
         "latch": "cpp",
         "semaphore": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "any": "cpp",
+        "charconv": "cpp",
+        "compare": "cpp",
+        "memory_resource": "cpp",
+        "variant": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++14",
     "C_Cpp.errorSquiggles": "Enabled"

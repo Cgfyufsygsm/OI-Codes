@@ -82,57 +82,50 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using pii = pair<int, int>;
-const int maxn = 505;
-int n, a[maxn], alreadyLen, now;
-vector<pii> op;
-vector<int> ans;
-map<int, int> vis;
+const int maxn = 2e5 + 5;
+using ll = long long;
+ll k, a[maxn];
+int n, loopS;
+bool vis[maxn];
 
-void rev(int pos) {
-    FOR(i, now + 1, pos - 1) op.push_back({i - now + alreadyLen + pos - 2, a[i]});
-    ans.push_back(2 * (pos - now - 1));
-    alreadyLen += 2 * (pos - now - 1);
-    reverse(a + now + 1, a + pos);
+int dfs(int now) {
+    if (vis[now]) return now;
+    vis[now] = 1;
+    return dfs((now + a[now]) % n);
+}
+
+void dfs(int now, int &len, ll &val) {
+    if (now == loopS && len != 0) return;
+    ++len, val += a[now];
+    dfs((now + a[now]) % n, len, val);
     return;
 }
 
+ll calc0(int now, int step) {
+    if (step == k) return 0;
+    return calc0((now + a[now]) % n, step + 1) + a[now];
+}
+
 int main() {
-    int T; read(T);
-    while (T--) {
-        read(n);
-        decltype(vis)().swap(vis);
-        FOR(i, 1, n) read(a[i]), ++vis[a[i]];
-        bool flg = 1;
-        for (auto &p : vis) if (p.second & 1) flg = 0;
-        if (!flg) {
-            print(-1);
-            continue;
-        }
-        decltype(op)().swap(op);
-        decltype(ans)().swap(ans);
-        alreadyLen = 0, now = 0;
-
-        while (now < n) {
-            if (now == n - 2) {
-                ans.push_back(2);
-                break;
-            }
-            int pos = 0;
-            FOR(i, now + 2, n) if (a[i] == a[now + 1]) {
-                pos = i;
-                break;
-            }
-            rev(pos), rev(pos + 1);
-            ans.push_back(2);
-            now += 2;
-        }
-
-        print(op.size());
-        for (auto &p : op) print(p.first, p.second);
-        print(ans.size());
-        for (auto x : ans) print(x, ' ');
-        putchar('\n');
+    read(n, k);
+    FOR(i, 0, n - 1) read(a[i]);
+    loopS = dfs(0);
+    //printf("loop %d\n", loopS);
+    int loopLen = 0;
+    ll loopVal = 0;
+    dfs(loopS, loopLen, loopVal);
+    //printf("looplen %d\n", loopLen);
+    int stLen = 0;
+    ll stVal = 0;
+    dfs(0, stLen, stVal);
+    //printf("stlen %d stval %lld\n", stLen, stVal);
+    if (k < stLen) print(calc0(0, 0));
+    else {
+        k -= stLen;
+        ll ans = stVal + loopVal * (k / loopLen);
+        k %= loopLen;
+        ans += calc0(loopS, 0);
+        print(ans);
     }
     return output(), 0;
 }

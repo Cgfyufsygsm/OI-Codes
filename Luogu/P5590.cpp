@@ -82,58 +82,66 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using pii = pair<int, int>;
-const int maxn = 505;
-int n, a[maxn], alreadyLen, now;
-vector<pii> op;
-vector<int> ans;
-map<int, int> vis;
+const int maxn = 1005, maxm = 4005;
+int head[maxn], to[maxm], nxt[maxm], w[maxm], cnte, dis[maxn], cnt[maxn], inq[maxn], n, m;
 
-void rev(int pos) {
-    FOR(i, now + 1, pos - 1) op.push_back({i - now + alreadyLen + pos - 2, a[i]});
-    ans.push_back(2 * (pos - now - 1));
-    alreadyLen += 2 * (pos - now - 1);
-    reverse(a + now + 1, a + pos);
+struct Edge {
+    int u, v;
+} e[maxm];
+
+vector<int> G[maxn], rG[maxn];
+bool vis1[maxn], vis2[maxn];
+
+void dfs(int u, bool (&vis)[maxn], vector<int> (&G)[maxn]) {
+    vis[u] = 1;
+    for (int v : G[u]) {
+        if (!vis[v]) dfs(v, vis, G);
+    }
     return;
 }
 
-int main() {
-    int T; read(T);
-    while (T--) {
-        read(n);
-        decltype(vis)().swap(vis);
-        FOR(i, 1, n) read(a[i]), ++vis[a[i]];
-        bool flg = 1;
-        for (auto &p : vis) if (p.second & 1) flg = 0;
-        if (!flg) {
-            print(-1);
-            continue;
-        }
-        decltype(op)().swap(op);
-        decltype(ans)().swap(ans);
-        alreadyLen = 0, now = 0;
+il void add(int u, int v, int w) {
+    to[++cnte] = v;
+    YangTY::w[cnte] = w;
+    nxt[cnte] = head[u];
+    head[u] = cnte;
+    return;
+}
 
-        while (now < n) {
-            if (now == n - 2) {
-                ans.push_back(2);
-                break;
+bool SPFA() {
+    queue<int> q;
+    memset(dis, 0x3f, sizeof dis);
+    dis[0] = 0, inq[0] = cnt[0] = 1, q.push(0);
+    while (!q.empty()) {
+        int u = q.front(); q.pop(), inq[u] = 0;
+        for (int i = head[u]; i; i = nxt[i]) {
+            int &v = to[i];
+            if (dis[v] > dis[u] + w[i]) {
+                dis[v] = dis[u] + w[i];
+                if (!inq[v]) {
+                    if (++cnt[v] > n) return true;
+                    q.push(v);
+                }
             }
-            int pos = 0;
-            FOR(i, now + 2, n) if (a[i] == a[now + 1]) {
-                pos = i;
-                break;
-            }
-            rev(pos), rev(pos + 1);
-            ans.push_back(2);
-            now += 2;
         }
-
-        print(op.size());
-        for (auto &p : op) print(p.first, p.second);
-        print(ans.size());
-        for (auto x : ans) print(x, ' ');
-        putchar('\n');
     }
+    return false;
+}
+
+int main() {
+    read(n, m);
+    FOR(i, 1, m) {
+        read(e[i].u, e[i].v);
+        G[e[i].u].push_back(e[i].v), rG[e[i].v].push_back(e[i].u);
+    }
+    dfs(1, vis1, G), dfs(n, vis2, rG);
+    if (!vis1[n]) return puts("-1"), 0;
+    FOR(i, 1, m)
+        if (vis1[e[i].u] && vis2[e[i].v]) add(e[i].v, e[i].u, -1), add(e[i].u, e[i].v, 9);
+    FOR(i, 1, n) add(0, i, 0);
+    if (SPFA()) return puts("-1"), 0;
+    print(n, m);
+    FOR(i, 1, m) print(e[i].u, e[i].v, (vis1[e[i].u] && vis2[e[i].v]) ? dis[e[i].v] - dis[e[i].u] : 8);
     return output(), 0;
 }
 

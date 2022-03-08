@@ -82,58 +82,70 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using pii = pair<int, int>;
-const int maxn = 505;
-int n, a[maxn], alreadyLen, now;
-vector<pii> op;
-vector<int> ans;
-map<int, int> vis;
+using ll = long long;
+using pll = pair<ll, ll>;
+const int maxn = 3e5 + 5;
+int n, m, L[maxn], R[maxn], stk[maxn], top;
+ll t[maxn << 2], ans[maxn];
+pll a[maxn];
+vector<pll> op[maxn], q[maxn];
 
-void rev(int pos) {
-    FOR(i, now + 1, pos - 1) op.push_back({i - now + alreadyLen + pos - 2, a[i]});
-    ans.push_back(2 * (pos - now - 1));
-    alreadyLen += 2 * (pos - now - 1);
-    reverse(a + now + 1, a + pos);
+il ll calc(int i, int j) {return myabs(a[i].first - a[j].first) * (a[i].second + a[j].second);}
+
+#define L (k << 1)
+#define R (L | 1)
+#define M ((i + j) >> 1)
+
+void modify(int i, int j, int k, int x, ll v) {
+    if (i == j) {
+        chkmin(t[k], v);
+        return;
+    }
+    if (x <= M) modify(i, M, L, x, v);
+    else modify(M + 1, j, R, x, v);
+    t[k] = min(t[L], t[R]);
     return;
 }
 
+ll query(int i, int j, int k, int x, int y) {
+    if (x <= i && y >= j) return t[k];
+    ll ret = 2e18;
+    if (x <= M) chkmin(ret, query(i, M, L, x, y));
+    if (y > M) chkmin(ret, query(M + 1, j, R, x, y));
+    return ret;
+}
+
+#undef L
+#undef R
+#undef M
+
 int main() {
-    int T; read(T);
-    while (T--) {
-        read(n);
-        decltype(vis)().swap(vis);
-        FOR(i, 1, n) read(a[i]), ++vis[a[i]];
-        bool flg = 1;
-        for (auto &p : vis) if (p.second & 1) flg = 0;
-        if (!flg) {
-            print(-1);
-            continue;
-        }
-        decltype(op)().swap(op);
-        decltype(ans)().swap(ans);
-        alreadyLen = 0, now = 0;
-
-        while (now < n) {
-            if (now == n - 2) {
-                ans.push_back(2);
-                break;
-            }
-            int pos = 0;
-            FOR(i, now + 2, n) if (a[i] == a[now + 1]) {
-                pos = i;
-                break;
-            }
-            rev(pos), rev(pos + 1);
-            ans.push_back(2);
-            now += 2;
-        }
-
-        print(op.size());
-        for (auto &p : op) print(p.first, p.second);
-        print(ans.size());
-        for (auto x : ans) print(x, ' ');
-        putchar('\n');
+    read(n, m);
+    FOR(i, 1, n) read(a[i].first, a[i].second);
+    FOR(i, 1, m) {
+        int l, r; read(l, r);
+        q[r].push_back({l, i});
     }
+    FOR(i, 1, n) {
+        while (top > 0 && a[stk[top]].second > a[i].second) --top;
+        L[i] = stk[top], stk[++top] = i;
+    }
+    top = 0;
+    DEC(i, n, 1) {
+        while (top > 0 && a[stk[top]].second > a[i].second) --top;
+        R[i] = stk[top], stk[++top] = i;
+    }
+    FOR(i, 1, n) {
+        if (L[i]) op[i].push_back({L[i], calc(L[i], i)});
+        if (R[i]) op[R[i]].push_back({i, calc(i, R[i])});
+    }
+
+    memset(t, 0x3f, sizeof t);
+    FOR(i, 1, n) {
+        for (auto &p : op[i]) modify(1, n, 1, p.first, p.second);
+        for (auto &p : q[i]) ans[p.second] = query(1, n, 1, p.first, i);
+    }
+    FOR(i, 1, m) print(ans[i]);
     return output(), 0;
 }
 

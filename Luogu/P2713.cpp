@@ -82,57 +82,51 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using pii = pair<int, int>;
-const int maxn = 505;
-int n, a[maxn], alreadyLen, now;
-vector<pii> op;
-vector<int> ans;
-map<int, int> vis;
+mt19937 rnd(19260817);
+const int maxn = 1e6 + 5;
+int n, dead[maxn], m;
+struct node {
+    int val, rt, ch[2];
+} t[maxn];
 
-void rev(int pos) {
-    FOR(i, now + 1, pos - 1) op.push_back({i - now + alreadyLen + pos - 2, a[i]});
-    ans.push_back(2 * (pos - now - 1));
-    alreadyLen += 2 * (pos - now - 1);
-    reverse(a + now + 1, a + pos);
-    return;
+#define ls(x) t[x].ch[0]
+#define rs(x) t[x].ch[1]
+
+int merge(int x, int y) {
+    if (!x || !y) return x + y;
+    if (t[x].val > t[y].val) swap(x, y);
+    if (rnd() & 1) swap(ls(x), rs(x));
+    ls(x) = merge(ls(x), y);
+    t[ls(x)].rt = x;
+    return x;
 }
 
+int find(int x) {return x == t[x].rt ? x : t[x].rt = find(t[x].rt);}
+
 int main() {
-    int T; read(T);
-    while (T--) {
-        read(n);
-        decltype(vis)().swap(vis);
-        FOR(i, 1, n) read(a[i]), ++vis[a[i]];
-        bool flg = 1;
-        for (auto &p : vis) if (p.second & 1) flg = 0;
-        if (!flg) {
-            print(-1);
-            continue;
-        }
-        decltype(op)().swap(op);
-        decltype(ans)().swap(ans);
-        alreadyLen = 0, now = 0;
-
-        while (now < n) {
-            if (now == n - 2) {
-                ans.push_back(2);
-                break;
+    read(n);
+    FOR(i, 1, n) read(t[i].val), t[i].rt = i;
+    read(m);
+    while (m--) {
+        char s[3]; int x, y;
+        read(s), read(x);
+        if (s[0] == 'M') {
+            read(y);
+            if (dead[x] || dead[y]) continue;
+            x = find(x), y = find(y);
+            if (x != y) merge(x, y);
+        } else {
+            if (dead[x]) {
+                print(0);
+                continue;
             }
-            int pos = 0;
-            FOR(i, now + 2, n) if (a[i] == a[now + 1]) {
-                pos = i;
-                break;
-            }
-            rev(pos), rev(pos + 1);
-            ans.push_back(2);
-            now += 2;
+            x = find(x);
+            print(t[x].val);
+            dead[x] = 1;
+            t[ls(x)].rt = ls(x), t[rs(x)].rt = rs(x);
+            t[x].rt = merge(ls(x), rs(x));
+            ls(x) = rs(x) = 0;
         }
-
-        print(op.size());
-        for (auto &p : op) print(p.first, p.second);
-        print(ans.size());
-        for (auto x : ans) print(x, ' ');
-        putchar('\n');
     }
     return output(), 0;
 }

@@ -82,57 +82,49 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using pii = pair<int, int>;
-const int maxn = 505;
-int n, a[maxn], alreadyLen, now;
-vector<pii> op;
-vector<int> ans;
-map<int, int> vis;
-
-void rev(int pos) {
-    FOR(i, now + 1, pos - 1) op.push_back({i - now + alreadyLen + pos - 2, a[i]});
-    ans.push_back(2 * (pos - now - 1));
-    alreadyLen += 2 * (pos - now - 1);
-    reverse(a + now + 1, a + pos);
-    return;
-}
+using ll = long long;
+multiset<ll> S;
 
 int main() {
-    int T; read(T);
-    while (T--) {
-        read(n);
-        decltype(vis)().swap(vis);
-        FOR(i, 1, n) read(a[i]), ++vis[a[i]];
-        bool flg = 1;
-        for (auto &p : vis) if (p.second & 1) flg = 0;
-        if (!flg) {
-            print(-1);
-            continue;
-        }
-        decltype(op)().swap(op);
-        decltype(ans)().swap(ans);
-        alreadyLen = 0, now = 0;
-
-        while (now < n) {
-            if (now == n - 2) {
-                ans.push_back(2);
-                break;
+    int q; read(q);
+    while (q--) {
+        int op, k; ll x; read(op, x);
+        if (op != 1) read(k);
+        if (op == 1) S.insert(x);
+        else if (op == 2) {
+            for (auto it = S.upper_bound(x); ; --it) {
+                if (it == S.end() && S.size() < k) {
+                    print(-1);
+                    break;
+                }
+                if (*it > x && it == S.begin()) {
+                    print(-1);
+                    break;
+                }
+                if (it == S.end() || *it > x) continue;
+                --k;
+                if (!k) {
+                    print(*it);
+                    break;
+                }
+                if (it == S.begin()) {
+                    print(-1);
+                    break;
+                }
             }
-            int pos = 0;
-            FOR(i, now + 2, n) if (a[i] == a[now + 1]) {
-                pos = i;
-                break;
+        } else {
+            for (auto it = S.lower_bound(x); ; ++it) {
+                if (it == S.end()) {
+                    print(-1);
+                    break;
+                }
+                --k;
+                if (!k) {
+                    print(*it);
+                    break;
+                }
             }
-            rev(pos), rev(pos + 1);
-            ans.push_back(2);
-            now += 2;
         }
-
-        print(op.size());
-        for (auto &p : op) print(p.first, p.second);
-        print(ans.size());
-        for (auto x : ans) print(x, ' ');
-        putchar('\n');
     }
     return output(), 0;
 }

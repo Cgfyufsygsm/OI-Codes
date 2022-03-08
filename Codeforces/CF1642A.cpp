@@ -82,57 +82,15 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using pii = pair<int, int>;
-const int maxn = 505;
-int n, a[maxn], alreadyLen, now;
-vector<pii> op;
-vector<int> ans;
-map<int, int> vis;
-
-void rev(int pos) {
-    FOR(i, now + 1, pos - 1) op.push_back({i - now + alreadyLen + pos - 2, a[i]});
-    ans.push_back(2 * (pos - now - 1));
-    alreadyLen += 2 * (pos - now - 1);
-    reverse(a + now + 1, a + pos);
-    return;
-}
+pair<int, int> p[4];
 
 int main() {
     int T; read(T);
     while (T--) {
-        read(n);
-        decltype(vis)().swap(vis);
-        FOR(i, 1, n) read(a[i]), ++vis[a[i]];
-        bool flg = 1;
-        for (auto &p : vis) if (p.second & 1) flg = 0;
-        if (!flg) {
-            print(-1);
-            continue;
-        }
-        decltype(op)().swap(op);
-        decltype(ans)().swap(ans);
-        alreadyLen = 0, now = 0;
-
-        while (now < n) {
-            if (now == n - 2) {
-                ans.push_back(2);
-                break;
-            }
-            int pos = 0;
-            FOR(i, now + 2, n) if (a[i] == a[now + 1]) {
-                pos = i;
-                break;
-            }
-            rev(pos), rev(pos + 1);
-            ans.push_back(2);
-            now += 2;
-        }
-
-        print(op.size());
-        for (auto &p : op) print(p.first, p.second);
-        print(ans.size());
-        for (auto x : ans) print(x, ' ');
-        putchar('\n');
+        FOR(i, 1, 3) read(p[i].first, p[i].second);
+        sort(p + 1, p + 4, [](const auto &a, const auto &b) {return a.second > b.second;});
+        if (p[1].second == p[2].second) print(myabs(p[1].first - p[2].first));
+        else print(0);
     }
     return output(), 0;
 }
