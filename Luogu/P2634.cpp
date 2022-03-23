@@ -82,62 +82,91 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using ll = long long;
-const int maxn = 1e5 + 5;
+const int maxn = 2e4 + 5;
+int n, head[maxn], cnte;
 
-struct Node {
-    int ch[2], mn;
-    Node() {mn = 1e9;}
-} t[maxn * 50];
-int n, tot, root;
-ll g, r, s[maxn], f[maxn];
+struct Edge {
+    int to, nxt, w;
+} e[maxn << 1];
 
-#define ls(u) t[u].ch[0]
-#define rs(u) t[u].ch[1]
-#define M ((i + j) >> 1)
-
-void modify(int &k, int i, int j, int x, int v) {
-    if (!k) k = ++tot;
-    if (i == j) return t[k].mn = v, void();
-    if (x <= M) modify(ls(k), i, M, x, v);
-    else modify(rs(k), M + 1, j, x, v);
-    t[k].mn = min(t[ls(k)].mn, t[rs(k)].mn);
+il void add(int u, int v, int w) {
+    e[++cnte].to = v;
+    e[cnte].nxt = head[u];
+    e[cnte].w = w;
+    head[u] = cnte;
     return;
 }
 
-int query(int k, int i, int j, int x, int y) {
-    if (!k) return 1e9;
-    if (x <= i && y >= j) return t[k].mn;
-    int ret = 1e9;
-    if (x <= M) chkmin(ret, query(ls(k), i, M, x, y));
-    if (y > M) chkmin(ret, query(rs(k), M + 1, j, x, y));
-    return ret;
+int maxp[maxn], root, tot, size[maxn], vis[maxn];
+
+void getRt(int u, int fa) {
+    size[u] = 1, maxp[u] = 0;
+    for (int i = head[u]; i; i = e[i].nxt) {
+        int &v = e[i].to;
+        if (v == fa || vis[v]) continue;
+        getRt(v, u);
+        size[u] += size[v];
+        chkmax(maxp[u], size[v]);
+    }
+    chkmax(maxp[u], tot - size[u]);
+    if (maxp[u] < maxp[root]) root = u;
+    return;
+}
+
+int dis[maxn], buc[3], tmp[3], ans[3];
+
+void getDis(int u, int fa) {
+    ++tmp[dis[u]];
+    for (int i = head[u]; i; i = e[i].nxt) {
+        int &v = e[i].to;
+        if (v == fa || vis[v]) continue;
+        dis[v] = (dis[u] + e[i].w) % 3;
+        getDis(v, u);
+    }
+    return;
+}
+
+void calc(int u) {
+    buc[0] = 1, buc[1] = buc[2] = 0;
+    for (int i = head[u]; i; i = e[i].nxt) {
+        int &v = e[i].to;
+        if (vis[v]) continue;
+        dis[v] = e[i].w;
+        tmp[0] = tmp[1] = tmp[2] = 0;
+        getDis(v, u);
+        FOR(a, 0, 2) FOR(b, 0, 2) ans[(a + b) % 3] += buc[a] * tmp[b];
+        FOR(a, 0, 2) buc[a] += tmp[a];
+    }
+    return;
+}
+
+void divide(int u) {
+    vis[u] = 1;
+    calc(u);
+    for (int i = head[u]; i; i = e[i].nxt) {
+        int &v = e[i].to;
+        if (vis[v]) continue;
+        maxp[root = 0] = n, tot = size[v];
+        getRt(v, u);
+        getRt(root, 0);
+        divide(root);
+    }
+    return;
 }
 
 int main() {
-    read(n, g, r);
-    FOR(i, 1, n + 1) read(s[i]), s[i] += s[i - 1];
-    ll p = (g + r);
-    DEC(i, n, 1) {
-        int l = (g + s[i]) % p, r = (p - 1 + s[i]) % p;
-        int k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) f[i] = s[n + 1] - s[i];
-        else f[i] = s[k] - s[i] + (p - (s[k] - s[i]) % p) + f[k];
-        modify(root, 0, p - 1, s[i] % p, i);
+    read(n);
+    FOR(i, 2, n) {
+        int u, v, w; read(u, v, w), w %= 3;
+        add(u, v, w), add(v, u, w);
     }
-    int q; read(q);
-    while (q--) {
-        ll t0, ans; read(t0);
-        int t = t0 % p;
-        int l = (g - t + p) % p, r = (p - t - 1 + p) % p, k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) ans = s[n + 1] + t0;
-        else ans = f[k] + t0 + s[k] + (p - (s[k] + t0) % p);
-        print(ans);
-    }
+    maxp[root = 0] = tot = n;
+    getRt(1, 0);
+    getRt(root, 0);
+    divide(root);
+    int up = ((ans[0] << 1) + n), down = ((ans[1] + ans[2]) << 1) + up, g = __gcd(up, down);
+    up /= g, down /= g;
+    printf("%d/%d\n", up, down);
     return output(), 0;
 }
 

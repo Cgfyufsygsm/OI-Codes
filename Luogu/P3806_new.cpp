@@ -82,62 +82,96 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using ll = long long;
-const int maxn = 1e5 + 5;
+const int maxn = 1e4 + 5, W = 1e7 + 5;
+int head[maxn], cnte, vis[maxn], n, m, buc[W];
+int root, tot, maxp[maxn], size[maxn], dis[maxn], query[maxn], ans[maxn], maxq;
 
-struct Node {
-    int ch[2], mn;
-    Node() {mn = 1e9;}
-} t[maxn * 50];
-int n, tot, root;
-ll g, r, s[maxn], f[maxn];
+struct Edge {
+    int to, nxt, w;
+} e[maxn << 1];
 
-#define ls(u) t[u].ch[0]
-#define rs(u) t[u].ch[1]
-#define M ((i + j) >> 1)
-
-void modify(int &k, int i, int j, int x, int v) {
-    if (!k) k = ++tot;
-    if (i == j) return t[k].mn = v, void();
-    if (x <= M) modify(ls(k), i, M, x, v);
-    else modify(rs(k), M + 1, j, x, v);
-    t[k].mn = min(t[ls(k)].mn, t[rs(k)].mn);
+il void add(int u, int v, int w) {
+    e[++cnte].to = v;
+    e[cnte].w = w;
+    e[cnte].nxt = head[u];
+    head[u] = cnte;
     return;
 }
 
-int query(int k, int i, int j, int x, int y) {
-    if (!k) return 1e9;
-    if (x <= i && y >= j) return t[k].mn;
-    int ret = 1e9;
-    if (x <= M) chkmin(ret, query(ls(k), i, M, x, y));
-    if (y > M) chkmin(ret, query(rs(k), M + 1, j, x, y));
-    return ret;
+void getRt(int u, int fa) {
+    size[u] = 1, maxp[u] = 0;
+    for (int i = head[u]; i; i = e[i].nxt) {
+        int &v = e[i].to;
+        if (v == fa || vis[v]) continue;
+        getRt(v, u);
+        size[u] += size[v];
+        chkmax(maxp[u], size[v]);
+    }
+    chkmax(maxp[u], tot - size[u]);
+    if (maxp[u] < maxp[root]) root = u;
+    return;
+}
+
+void getDis(int u, int fa, int *now) {
+    if (dis[u] > maxq) return;
+    now[++now[0]] = dis[u];
+    for (int i = head[u]; i; i = e[i].nxt) {
+        int &v = e[i].to;
+        if (v == fa || vis[v]) continue;
+        dis[v] = dis[u] + e[i].w;
+        getDis(v, u, now);
+    }
+    return;
+}
+
+void calc(int u) {
+    static int q[maxn], now[maxn], cnt; // q 维护加入了桶的元素, now 维护当前子树内的元素
+    cnt = 0;
+    for (int i = head[u]; i; i = e[i].nxt) {
+        int v = e[i].to;
+        if (vis[v]) continue;
+        now[0] = 0, dis[v] = e[i].w;
+        getDis(v, u, now);
+        FOR(j, 1, now[0]) // 开始合并答案
+            FOR(k, 1, m)
+                if (query[k] >= now[j])
+                    ans[k] |= buc[query[k] - now[j]];
+        FOR(j, 1, now[0])
+            buc[now[j]] = 1, q[++cnt] = now[j]; // 加入桶
+    }
+    FOR(i, 1, cnt) buc[q[i]] = 0; // 清空桶
+    return;
+}
+
+void divide(int u) {
+    vis[u] = buc[0] = 1; // 删掉 u 点并初始化桶
+    calc(u); // 计算当前点的答案
+    for (int i = head[u]; i; i = e[i].nxt) {
+        int v = e[i].to;
+        if (vis[v]) continue;
+        maxp[0] = n, tot = size[v], root = 0;
+        getRt(v, u); // 找到子树重心
+        getRt(root, 0); // 获取子树中正确的 size
+        divide(root);
+    }
+    return;
 }
 
 int main() {
-    read(n, g, r);
-    FOR(i, 1, n + 1) read(s[i]), s[i] += s[i - 1];
-    ll p = (g + r);
-    DEC(i, n, 1) {
-        int l = (g + s[i]) % p, r = (p - 1 + s[i]) % p;
-        int k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) f[i] = s[n + 1] - s[i];
-        else f[i] = s[k] - s[i] + (p - (s[k] - s[i]) % p) + f[k];
-        modify(root, 0, p - 1, s[i] % p, i);
+    read(n, m);
+    FOR(i, 2, n) {
+        int u, v, w; read(u, v, w);
+        add(u, v, w), add(v, u, w);
     }
-    int q; read(q);
-    while (q--) {
-        ll t0, ans; read(t0);
-        int t = t0 % p;
-        int l = (g - t + p) % p, r = (p - t - 1 + p) % p, k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) ans = s[n + 1] + t0;
-        else ans = f[k] + t0 + s[k] + (p - (s[k] + t0) % p);
-        print(ans);
-    }
+    FOR(i, 1, m) read(query[i]);
+    maxq = *max_element(query + 1, query + m + 1);
+
+    maxp[0] = n;
+    getRt(1, 0);
+    getRt(root, 0);
+    divide(root);
+
+    FOR(i, 1, m) print(ans[i] ? "AYE" : "NAY");
     return output(), 0;
 }
 

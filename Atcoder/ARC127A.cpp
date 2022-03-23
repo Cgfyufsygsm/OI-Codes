@@ -83,61 +83,36 @@ template<typename T> il void myswap(T &a, T &b) {
 }
 
 using ll = long long;
-const int maxn = 1e5 + 5;
 
-struct Node {
-    int ch[2], mn;
-    Node() {mn = 1e9;}
-} t[maxn * 50];
-int n, tot, root;
-ll g, r, s[maxn], f[maxn];
+int a[17], tot;
+ll pow10[17];
 
-#define ls(u) t[u].ch[0]
-#define rs(u) t[u].ch[1]
-#define M ((i + j) >> 1)
-
-void modify(int &k, int i, int j, int x, int v) {
-    if (!k) k = ++tot;
-    if (i == j) return t[k].mn = v, void();
-    if (x <= M) modify(ls(k), i, M, x, v);
-    else modify(rs(k), M + 1, j, x, v);
-    t[k].mn = min(t[ls(k)].mn, t[rs(k)].mn);
-    return;
-}
-
-int query(int k, int i, int j, int x, int y) {
-    if (!k) return 1e9;
-    if (x <= i && y >= j) return t[k].mn;
-    int ret = 1e9;
-    if (x <= M) chkmin(ret, query(ls(k), i, M, x, y));
-    if (y > M) chkmin(ret, query(rs(k), M + 1, j, x, y));
-    return ret;
-}
 
 int main() {
-    read(n, g, r);
-    FOR(i, 1, n + 1) read(s[i]), s[i] += s[i - 1];
-    ll p = (g + r);
-    DEC(i, n, 1) {
-        int l = (g + s[i]) % p, r = (p - 1 + s[i]) % p;
-        int k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) f[i] = s[n + 1] - s[i];
-        else f[i] = s[k] - s[i] + (p - (s[k] - s[i]) % p) + f[k];
-        modify(root, 0, p - 1, s[i] % p, i);
+    ll n, ans = 0; read(n);
+    ll x = n;
+    while (x) a[++tot] = x % 10, x /= 10;
+    pow10[1] = 1;
+    FOR(i, 2, tot) pow10[i] = pow10[i - 1] * 10;
+    FOR(i, 1, tot - 1) { // 枚举位数
+        FOR(j, 1, i)
+            ans += (i - j + 1) * (pow10[j] - pow10[j - 1]);
     }
-    int q; read(q);
-    while (q--) {
-        ll t0, ans; read(t0);
-        int t = t0 % p;
-        int l = (g - t + p) % p, r = (p - t - 1 + p) % p, k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) ans = s[n + 1] + t0;
-        else ans = f[k] + t0 + s[k] + (p - (s[k] + t0) % p);
-        print(ans);
+    // 考虑位数顶满的情况
+    
+    int lim = 1, cnt = 0;
+    DEC(i, tot, 1) {
+        if (lim && a[i] < 1) break;
+        if (a[i] != 1) lim = 0;
+        ++cnt;
+        if (!lim) ans += cnt * (pow10[i] - pow10[i - 1]);
+        else {
+            if (!a[i - 1]) ans += cnt * (n % pow10[i] + 1);
+            else if (a[i - 1] == 1) ans += cnt * pow10[i - 1];
+            else ans += cnt * (n % pow10[i] + 1 - pow10[i - 1]);
+        }
     }
+    print(ans);
     return output(), 0;
 }
 

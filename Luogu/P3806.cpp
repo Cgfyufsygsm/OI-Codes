@@ -79,11 +79,11 @@ void calc(int u)
         rem[0] = 0;
         dis[v] = e[i].w;
         getdis(v, u);
-        DEC(j, rem[0], 1)
+        FOR(j, 1, rem[0])
             FOR(k, 1, m)
                 if (query[k] >= rem[j])
                     ans[k] |= judge[query[k] - rem[j]];
-        DEC(j, rem[0], 1)
+        FOR(j, 1, rem[0])
             q[++p] = rem[j], judge[rem[j]] = 1;
     }
     FOR(i, 1, p)

@@ -83,64 +83,72 @@ template<typename T> il void myswap(T &a, T &b) {
 }
 
 using ll = long long;
-const int maxn = 1e5 + 5;
+const int maxn = (1 << 17) | 500;
+int fa[maxn], ch[maxn][2], len[maxn][2], n;
 
-struct Node {
-    int ch[2], mn;
-    Node() {mn = 1e9;}
-} t[maxn * 50];
-int n, tot, root;
-ll g, r, s[maxn], f[maxn];
+using pll = pair<ll, ll>;
+vector<pll> S[maxn], Sl[maxn], Sr[maxn];
 
-#define ls(u) t[u].ch[0]
-#define rs(u) t[u].ch[1]
-#define M ((i + j) >> 1)
+#define fi first
+#define se second
 
-void modify(int &k, int i, int j, int x, int v) {
-    if (!k) k = ++tot;
-    if (i == j) return t[k].mn = v, void();
-    if (x <= M) modify(ls(k), i, M, x, v);
-    else modify(rs(k), M + 1, j, x, v);
-    t[k].mn = min(t[ls(k)].mn, t[rs(k)].mn);
-    return;
-}
-
-int query(int k, int i, int j, int x, int y) {
-    if (!k) return 1e9;
-    if (x <= i && y >= j) return t[k].mn;
-    int ret = 1e9;
-    if (x <= M) chkmin(ret, query(ls(k), i, M, x, y));
-    if (y > M) chkmin(ret, query(rs(k), M + 1, j, x, y));
-    return ret;
+bool check(ll mid) {
+    DEC(u, n, 1) {
+        S[u].clear(), Sl[u].clear(), Sr[u].clear();
+        if (!ch[u][0]) {
+            S[u].emplace_back(pll(0ll, 0ll));
+            continue;
+        }
+        ll w = mid - len[u][0] - len[u][1];
+        vector<pll> &L = S[ch[u][0]], &R = S[ch[u][1]], &lres = Sl[u], &rres = Sr[u], &res = S[u];
+        if (L.empty() || R.empty()) return false;
+        
+        for (auto itL = L.begin(), itR = R.begin(); itL != L.end(); ++itL) {
+            while (next(itR) != R.end() && next(itR)->fi + itL->se <= w) ++itR;
+            if (itR->fi + itL->se > w) continue;
+            lres.emplace_back(pll(itL->fi + len[u][0], itR->se + len[u][1]));
+        }
+        for (auto itL = L.begin(), itR = R.begin(); itR != R.end(); ++itR) {
+            while (next(itL) != L.end() && next(itL)->fi + itR->se <= w) ++itL;
+            if (itL->fi + itR->se > w) continue;
+            rres.emplace_back(pll(itR->fi + len[u][1], itL->se + len[u][0]));
+        }
+        for (auto itL = lres.begin(), itR = rres.begin(); itL != lres.end() || itR != rres.end();) {
+            if (itR == rres.end() || (itL != lres.end() && itL->fi <= itR->fi)) {
+                while (!res.empty() && res.back().fi == itL->fi && res.back().se >= itL->se) res.pop_back();
+                if (res.empty() || res.back().se > itL->se) res.emplace_back(*itL);
+                ++itL;
+            } else {
+                while (!res.empty() && res.back().fi == itR->fi && res.back().se >= itR->se) res.pop_back();
+                if (res.empty() || res.back().se > itR->se) res.emplace_back(*itR);
+                ++itR;
+            }
+        }
+    }
+    return !S[1].empty();
 }
 
 int main() {
-    read(n, g, r);
-    FOR(i, 1, n + 1) read(s[i]), s[i] += s[i - 1];
-    ll p = (g + r);
-    DEC(i, n, 1) {
-        int l = (g + s[i]) % p, r = (p - 1 + s[i]) % p;
-        int k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) f[i] = s[n + 1] - s[i];
-        else f[i] = s[k] - s[i] + (p - (s[k] - s[i]) % p) + f[k];
-        modify(root, 0, p - 1, s[i] % p, i);
+    read(n);
+    if (n == 1) {
+        print(0);
+        return output(), 0;
     }
-    int q; read(q);
-    while (q--) {
-        ll t0, ans; read(t0);
-        int t = t0 % p;
-        int l = (g - t + p) % p, r = (p - t - 1 + p) % p, k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) ans = s[n + 1] + t0;
-        else ans = f[k] + t0 + s[k] + (p - (s[k] + t0) % p);
-        print(ans);
+    FOR(i, 2, n) {
+        int p, l; read(p, l);
+        if (ch[p][0]) ch[p][1] = i, len[p][1] = l;
+        else ch[p][0] = i, len[p][0] = l;
+        fa[i] = p;
     }
+    ll l = 0, r = (1ll << 17) * 2 * n + 1, ans = r;
+    while (l < r) {
+        ll mid = (l + r >> 1);
+        if (check(mid)) ans = mid, r = mid;
+        else l = mid + 1;
+    }
+    print(ans);
     return output(), 0;
 }
-
 } // namespace YangTY
 
 int main() {

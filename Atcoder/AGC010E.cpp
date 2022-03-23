@@ -82,62 +82,38 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-using ll = long long;
-const int maxn = 1e5 + 5;
+const int maxn = 2005;
+int a[maxn], n, mp[maxn][maxn], vis[maxn], ind[maxn];
+vector<int> G[maxn];
 
-struct Node {
-    int ch[2], mn;
-    Node() {mn = 1e9;}
-} t[maxn * 50];
-int n, tot, root;
-ll g, r, s[maxn], f[maxn];
-
-#define ls(u) t[u].ch[0]
-#define rs(u) t[u].ch[1]
-#define M ((i + j) >> 1)
-
-void modify(int &k, int i, int j, int x, int v) {
-    if (!k) k = ++tot;
-    if (i == j) return t[k].mn = v, void();
-    if (x <= M) modify(ls(k), i, M, x, v);
-    else modify(rs(k), M + 1, j, x, v);
-    t[k].mn = min(t[ls(k)].mn, t[rs(k)].mn);
+void dfs(int u) {
+    vis[u] = 1;
+    FOR(v, 1, n) {
+        if (vis[v] || !mp[u][v]) continue;
+        G[u].push_back(v), ++ind[v];
+        dfs(v);
+    }
     return;
 }
 
-int query(int k, int i, int j, int x, int y) {
-    if (!k) return 1e9;
-    if (x <= i && y >= j) return t[k].mn;
-    int ret = 1e9;
-    if (x <= M) chkmin(ret, query(ls(k), i, M, x, y));
-    if (y > M) chkmin(ret, query(rs(k), M + 1, j, x, y));
-    return ret;
+void toposort() {
+    priority_queue<int> q;
+    FOR(i, 1, n) if (!ind[i]) q.push(i);
+    while (!q.empty()) {
+        int u = q.top(); q.pop();
+        print(a[u], ' ');
+        for (auto &v : G[u]) if (!--ind[v]) q.push(v);
+    }
+    return;
 }
 
 int main() {
-    read(n, g, r);
-    FOR(i, 1, n + 1) read(s[i]), s[i] += s[i - 1];
-    ll p = (g + r);
-    DEC(i, n, 1) {
-        int l = (g + s[i]) % p, r = (p - 1 + s[i]) % p;
-        int k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) f[i] = s[n + 1] - s[i];
-        else f[i] = s[k] - s[i] + (p - (s[k] - s[i]) % p) + f[k];
-        modify(root, 0, p - 1, s[i] % p, i);
-    }
-    int q; read(q);
-    while (q--) {
-        ll t0, ans; read(t0);
-        int t = t0 % p;
-        int l = (g - t + p) % p, r = (p - t - 1 + p) % p, k = 1e9;
-        if (l <= r) chkmin(k, query(root, 0, p - 1, l, r));
-        else chkmin(k, min(query(root, 0, p - 1, 0, r), query(root, 0, p - 1, l, p - 1)));
-        if (k > n) ans = s[n + 1] + t0;
-        else ans = f[k] + t0 + s[k] + (p - (s[k] + t0) % p);
-        print(ans);
-    }
+    read(n);
+    FOR(i, 1, n) read(a[i]);
+    sort(a + 1, a + n + 1);
+    FOR(i, 1, n) FOR(j, 1, n) if (__gcd(a[i], a[j]) > 1) mp[i][j] = mp[j][i] = 1;
+    FOR(i, 1, n) if (!vis[i]) dfs(i);
+    toposort();
     return output(), 0;
 }
 
