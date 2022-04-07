@@ -101,7 +101,12 @@
         "shared_mutex": "cpp",
         "span": "cpp",
         "stop_token": "cpp",
-        "syncstream": "cpp"
+        "syncstream": "cpp",
+        "internal_math": "cpp",
+        "modint": "cpp",
+        "internal_type_traits": "cpp",
+        "internal_scc": "cpp",
+        "internal_bit": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++14",
     "C_Cpp.errorSquiggles": "Enabled"

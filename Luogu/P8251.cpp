@@ -82,7 +82,54 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 5e5 + 5;
+int stk[maxn], top, a[maxn], b[maxn], las[maxn];
+int n, q, root[maxn], tot;
+
+struct Node {
+    int sum, ch[2];
+} t[maxn * 50];
+
+#define ls(u) t[u].ch[0]
+#define rs(u) t[u].ch[1]
+#define M ((i + j) >> 1)
+
+int clone(int u) {
+    t[++tot] = t[u];
+    return tot;
+}
+
+void insert(int &u, int i, int j, int x) {
+    u = clone(u);
+    ++t[u].sum;
+    if (i == j) return;
+    if (x <= M) insert(ls(u), i, M, x);
+    else insert(rs(u), M + 1, j, x);
+    return;
+}
+
+int query(int u, int i, int j, int x, int y) {
+    if (!u) return 0;
+    if (x <= i && y >= j) return t[u].sum;
+    int ret = 0;
+    if (x <= M) ret += query(ls(u), i, M, x, y);
+    if (y > M) ret += query(rs(u), M + 1, j, x, y);
+    return ret;
+}
+
 int main() {
+    read(n, q);
+    FOR(i, 1, n) read(a[i]);
+    FOR(i, 1, n) read(b[i]);
+    FOR(i, 1, n) {
+        while (top && (a[stk[top]] == a[i] || b[stk[top]] <= b[i])) --top;
+        las[i] = stk[top], insert(root[i] = root[i - 1], 0, n, las[i]);
+        stk[++top] = i;
+    }
+    while (q--) {
+        int l, r; read(l, r);
+        print(query(root[r], 0, n, 0, l - 1) - query(root[l - 1], 0, n, 0, l - 1));
+    }
     return output(), 0;
 }
 
