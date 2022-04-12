@@ -27,7 +27,12 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+string s;
+
 int main() {
+    cin >> s;
+    s.pop_back();
+    cout << '0' << s << endl;
     return 0;
 }
 

@@ -27,7 +27,28 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+using ll = long long;
+deque<pair<int, ll>> q;
+
 int main() {
+    int n; cin >> n;
+    while (n--) {
+        int op, x, c; cin >> op;
+        if (op == 1) {
+            cin >> x >> c;
+            q.push_back({c, x});
+        } else {
+            cin >> c;
+            int cnt = 0; ll sum = 0;
+            while (cnt < c) {
+                auto now = q.front(); q.pop_front();
+                int delta = min(now.first, c - cnt);
+                cnt += delta, sum += delta * now.second;
+                if (delta != now.first) q.push_front({now.first - delta, now.second});
+            }
+            cout << sum << endl;
+        }
+    }
     return 0;
 }
 

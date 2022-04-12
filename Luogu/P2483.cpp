@@ -38,7 +38,7 @@ struct Edge {
 } e[maxm << 1];
 
 struct Node {
-    int ch[2], dis, fa;
+    int ch[2], fa;
     db val;
 } t[maxm * 30];
 
@@ -47,19 +47,19 @@ struct Node {
 
 int newNode(int fa, db val) {
     int u = ++tot;
-    ls(u) = rs(u) = t[u].dis = 0;
+    ls(u) = rs(u) = 0;
     t[u].fa = fa, t[u].val = val;
     return u;
 }
 
 int merge(int x, int y) {
+    static mt19937 rnd(20041031);
     if (!x || !y) return x + y;
     if (t[x].val > t[y].val) swap(x, y);
     int u = ++tot;
     t[u] = t[x];
     rs(u) = merge(rs(u), y);
-    if (t[ls(u)].dis < t[rs(u)].dis) swap(ls(u), rs(u));
-    t[u].dis = t[ls(u)].dis + 1;
+    if (rnd() & 1) swap(ls(u), rs(u));
     return u;
 }
 

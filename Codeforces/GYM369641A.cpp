@@ -2,7 +2,6 @@
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
-#define debug(...) fprintf(stderr, __VA_ARGS__)
 
 using namespace std;
 
@@ -27,7 +26,30 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 3e5 + 5;
+int f[maxn], a[maxn], d[maxn], n;
+map<int, int> g[maxn];
+
 int main() {
+    int T; cin >> T;
+    while (T--) {
+        cin >> n;
+        FOR(i, 1, n) {
+            cin >> a[i];
+            g[i].clear();
+        }
+        FOR(i, 1, n - 1) d[i] = a[i + 1] - a[i];
+        f[0] = 1;
+        FOR(i, 1, n - 1) {
+            g[i][d[i]] = i - 1;
+            f[i] = f[i - 1] + 1;
+            for (int x = d[i]; g[g[i][x]].count(x); x <<= 1) {
+                g[i][x << 1] = g[g[i][x]][x];
+                chkmin(f[i], f[g[i][x << 1]] + 1);
+            }
+        }
+        cout << f[n - 1] << endl;
+    }
     return 0;
 }
 

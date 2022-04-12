@@ -1,5 +1,4 @@
-#include <cstdio>
-#include <cctype>
+#include <bits/stdc++.h>
 #define L son[0]
 #define R son[1]
 #define FOR(i, a, b) for (int i = a; i <= b; ++i)
@@ -25,7 +24,7 @@ inline void swap(int &a, int &b)
 
 struct node
 {
-    int val, son[2], rt, dis;
+    int val, son[2], rt;
 } t[maxn];
 
 int get(int x)
@@ -35,15 +34,16 @@ int get(int x)
 
 int merge(int x, int y)
 {
+    static std::mt19937 rnd(20041031);
     if (!x || !y)
         return x + y;
     if (t[x].val > t[y].val || (t[x].val == t[y].val && x > y))
         swap(x, y);
     t[x].R = merge(t[x].R, y);
-    if (t[t[x].L].dis < t[t[x].R].dis)
+    if (rnd() & 1)
         swap(t[x].L, t[x].R);
     t[t[x].L].rt = t[t[x].R].rt = t[x].rt = x;
-    t[x].dis = t[t[x].R].dis + 1;
+    // t[x].dis = t[t[x].R].dis + 1;
     return x;
 }
 
@@ -59,7 +59,6 @@ int n;
 
 int main()
 {
-    t[0].dis = -1;
     n = read();
     int m = read();
     FOR(i, 1, n)

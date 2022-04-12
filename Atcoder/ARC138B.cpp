@@ -27,8 +27,27 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 2e5 + 5;
+int a[maxn], n, tag;
+deque<int> q;
+
+void delZero(deque<int> &q) {
+    while (!q.empty() && ((q.back() ^ tag) == 0)) q.pop_back();
+    return;
+}
+
 int main() {
-    return 0;
+    cin >> n;
+    FOR(i, 1, n) cin >> a[i], q.push_back(a[i]);
+    while (true) {
+        delZero(q);
+        if (q.empty()) break;
+        if (q.front() ^ tag) return puts("No"), 0;
+        else {
+            q.pop_front(), tag ^= 1;
+        }
+    }
+    return puts("Yes"), 0;
 }
 
 } // namespace YangTY

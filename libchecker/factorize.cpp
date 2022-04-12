@@ -2,9 +2,10 @@
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 
 using namespace std;
+
 using ll = long long;
 const ll a[10] = {2, 3, 5, 7, 11, 13, 17, 19, 23};
-ll maxAns;
+vector<ll> ans;
 
 ll qPow(ll base, ll exp, ll mod) {
     ll ret = 1;
@@ -30,13 +31,13 @@ bool isPrime(ll n) {
     return true;
 }
 
+ll f(ll x, ll c, ll mod) {return (__int128(x) * x % mod + c) % mod;}
 ll rnd(ll l, ll r = 0) {
     static mt19937_64 eng(20041031);
     if (l > r) swap(l, r);
     uniform_int_distribution<ll> dis(l, r);
     return dis(eng);
 }
-ll f(ll x, ll c, ll mod) {return (__int128(x) * x % mod + c) % mod;}
 
 ll pollardRho(ll n) {
     ll c = rnd(1, n - 1);
@@ -54,30 +55,32 @@ ll pollardRho(ll n) {
         ll d = __gcd(val, n);
         if (d > 1) return d;
     }
-    return -1;
 }
 
-void work(ll n) {
-    if (n <= maxAns || n < 2) return;
-    if (isPrime(n)) return maxAns = max(maxAns, n), void();
+vector<ll> work(ll n) {
+    if (n < 2) return {};
+    if (isPrime(n)) return {n};
     ll p = n;
     while (p >= n) p = pollardRho(n);
-    while (n % p == 0) n /= p;
-    work(n), work(p);
-    return;
+    vector<ll> tmp = work(p), ret;
+    while (n % p == 0) {
+        for (auto &x : tmp) ret.emplace_back(x);
+        n /= p;
+    }
+    tmp = work(n);
+    for (auto &x : tmp) ret.emplace_back(x);
+    return ret;
 }
 
 int main() {
     int T; cin >> T;
     while (T--) {
         ll n; cin >> n;
-        if (isPrime(n)) {
-            cout << "Prime" << endl;
-        } else {
-            maxAns = 0;
-            work(n);
-            cout << maxAns << endl;
-        }
+        auto ans = work(n);
+        sort(ans.begin(), ans.end());
+        cout << ans.size() << ' ';
+        for (auto &x : ans) cout << x << ' ';
+        cout << endl;
     }
     return 0;
 }

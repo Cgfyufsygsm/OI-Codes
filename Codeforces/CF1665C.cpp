@@ -27,7 +27,42 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+void process(vector<int> &vec, int &ans) {
+    if (vec.empty()) return;
+    int n = vec.size();
+    int las = 0;
+    FOR(i, 0, n - 1) {
+        if (vec[i] == vec[0]) las = i;
+        else break;
+    }
+    --vec[las], ++ans;
+    FOR(i, 0, n - 1) --vec[i];
+    while (!vec.empty() && vec.back() <= 0) vec.pop_back();
+    return process(vec, ans);
+}
+
 int main() {
+    int T; cin >> T;
+    while (T--) {
+        vector<int> vec;
+        int n, ans = 0; cin >> n, vec.resize(n + 1);
+        FOR(i, 2, n) {
+            int x; cin >> x;
+            ++vec[x];
+        }
+        vec.emplace_back(1);
+        sort(vec.rbegin(), vec.rend());
+        while (!vec.back()) vec.pop_back();
+        n = vec.size();
+        FOR(i, 0, n - 1) {
+            vec[i] = vec[i] - (n - i);
+            ++ans;
+        }
+        sort(vec.rbegin(), vec.rend());
+        while (!vec.empty() && vec.back() <= 0) vec.pop_back();
+        process(vec, ans);
+        cout << ans << endl;
+    }
     return 0;
 }
 

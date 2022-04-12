@@ -27,7 +27,32 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+vector<int> S[18];
+bool vis[18];
+
+void print(vector<int> &v) {
+    for (auto &x : v) cout << x << ' ';
+    return;
+}
+
+void print(int n) {
+    if (vis[n]) return print(S[n]);
+    if (n == 1) {
+        S[1].push_back(1);
+        vis[1] = 1;
+        return print(S[1]);
+    }
+    print(n - 1), cout << n << ' ', print(n - 1);
+    vis[n] = 1;
+    S[n] = S[n - 1];
+    S[n].push_back(n);
+    for (auto &x : S[n - 1]) S[n].push_back(x);
+    return;
+}
+
 int main() {
+    int n; cin >> n;
+    print(n);
     return 0;
 }
 

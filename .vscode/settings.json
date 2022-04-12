@@ -106,7 +106,8 @@
         "modint": "cpp",
         "internal_type_traits": "cpp",
         "internal_scc": "cpp",
-        "internal_bit": "cpp"
+        "internal_bit": "cpp",
+        "convolution": "cpp"
     },
     "C_Cpp.default.cppStandard": "c++14",
     "C_Cpp.errorSquiggles": "Enabled"

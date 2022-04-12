@@ -27,7 +27,21 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 105;
+string s[maxn], t[maxn];
+multiset<string> S;
+int n;
+
 int main() {
+    cin >> n;
+    FOR(i, 1, n) cin >> s[i] >> t[i], S.insert(s[i]), S.insert(t[i]);
+    bool flg = 1;
+    FOR(i, 1, n) {
+        S.erase(S.find(s[i])), S.erase(S.find(t[i]));
+        flg &= (!S.count(s[i]) || !S.count(t[i]));
+        S.insert(s[i]), S.insert(t[i]);
+    }
+    cout << (flg ? "Yes" : "No") << endl;
     return 0;
 }
 
