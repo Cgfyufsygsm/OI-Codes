@@ -93,7 +93,6 @@ node query(int i, int j, int k, int x, int y) {
 ll solve(int l, int r) {
     ll ret = 1;
     if (l >= r) return ret;
-    //printf("%d %d\n", l, r);
     node now = query(1, n, 1, l, r);
     int x = l, y = now.fir, curmin = now.minv;
     ret = ret * catalan(now.cnt) % mod;
