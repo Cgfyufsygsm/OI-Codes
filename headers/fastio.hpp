@@ -12,26 +12,51 @@ namespace internal {
 
 class IObase {
   private:
-    static const int maxc = 1 << 25;
-    char ibuf[maxc];
-    char obuf[maxc], *__oPos;
+    char *iPos, *iEnd, *oPos, *oEnd, *iBuf, *oBuf;
+    int iBufSize, oBufSize, flag;
 
   public:
     inline char getchar() {
-        static char *__iPos1 = ibuf, *__iPos2 = ibuf + fread(ibuf, 1, maxc, stdin);
-        return __iPos1 == __iPos2 ? EOF : *__iPos1++;
+        if (iBuf == nullptr || iPos == iEnd) {
+            if (iBuf) {
+                delete[] iBuf;
+                iBuf = nullptr;
+            }
+            if (!flag) return EOF;
+            iBufSize <<= 1;
+            iBuf = new char[iBufSize];
+            int readSize = fread(iBuf, 1, iBufSize, stdin);
+            flag &= (readSize == iBufSize);
+            iPos = iBuf, iEnd = iPos + readSize;
+        }
+        return *iPos++;
     }
 
     inline void putchar(char c) {
-        *__oPos++ = c;
+        if (oBuf == nullptr || oPos == oEnd) {
+            if (oBuf) {
+                fwrite(oBuf, oEnd - oBuf, 1, stdout);
+                delete[] oBuf;
+                oBuf = nullptr;
+            }
+            oBufSize <<= 1;
+            oBuf = new char[oBufSize];
+            oPos = oBuf, oEnd = oBuf + oBufSize;
+        }
+        *oPos++ = c;
+        return;
     }
 
     IObase() {
-        __oPos = obuf;
+        iBuf = oBuf = nullptr;
+        iPos = iEnd = oPos = oEnd = nullptr;
+        flag = 1, iBufSize = oBufSize = 1 << 23;
     }
 
     ~IObase() {
-        fwrite(obuf, __oPos - obuf, 1, stdout);
+        fwrite(oBuf, oPos - oBuf, 1, stdout);
+        if (iBuf) delete[] iBuf;
+        if (oBuf) delete[] oBuf;
     }
 } base;
 

@@ -3,6 +3,8 @@
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 #define debug(...) fprintf(stderr, __VA_ARGS__)
+#define fileIn(s) freopen(s, "r", stdin);
+#define fileOut(s) freopen(s, "w", stdout);
 
 using namespace std;
 
