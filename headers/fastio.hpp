@@ -50,7 +50,7 @@ class IObase {
     IObase() {
         iBuf = oBuf = nullptr;
         iPos = iEnd = oPos = oEnd = nullptr;
-        flag = 1, iBufSize = oBufSize = 1 << 23;
+        flag = 1, iBufSize = oBufSize = 1 << 20;
     }
 
     ~IObase() {

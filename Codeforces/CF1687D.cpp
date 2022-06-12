@@ -1,8 +1,11 @@
 #include <bits/stdc++.h>
 #define il inline
+#define int long long
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 #define debug(...) fprintf(stderr, __VA_ARGS__)
+#define fileIn(s) freopen(s, "r", stdin);
+#define fileOut(s) freopen(s, "w", stdout);
 
 using namespace std;
 
@@ -27,39 +30,40 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
-const int maxn = 2e5 + 5;
-char s[maxn];
-int n, sum[2][maxn];
+const int maxn = 4e6 + 6, N = 4e6;
+int n, a[maxn], vis[maxn], pre[maxn], suf[maxn];
 
-bool check(int mid) {
-    int l = 1, r = 0, l0 = 0, r1 = sum[1][n];
-    for (; r <= n; ++r, s[r] == '1' ? --r1 : ++l0) {
-        if (max(l0, r1) <= mid) return 1;
-        while (l <= r && l0 > mid) ++l, s[l - 1] == '1' ? ++r1 : --l0;
-    }
-    return 0;
-}
-
-int main() {
-    int T; cin >> T;
-    while (T--) {
-        cin >> s + 1;
-        n = strlen(s + 1);
-        FOR(k, 0, 1) FOR(i, 1, n) sum[k][i] = sum[k][i - 1] + (s[i] == k + '0');
-        int l = 0, r = n, ans;
-        while (l < r) {
-            int mid = (l + r) >> 1;
-            if (check(mid)) r = mid, ans = mid;
-            else l = mid + 1;
+signed main() {
+    cin >> n;
+    FOR(i, 1, n) cin >> a[i], vis[a[i] - a[1]] = 1;
+    pre[0] = -1, suf[N] = N;
+    FOR(i, 1, N) if (vis[i]) pre[i] = i; else pre[i] = pre[i - 1];
+    DEC(i, N - 1, 1) if (vis[i]) suf[i] = i; else suf[i] = suf[i + 1];
+    FOR(i, 1, a[n]) {
+        if (i * (i + 1) < a[1]) continue;
+        int lb = 0, rb = i;
+        if (a[1] > i * i) lb = a[1] - i * i;
+        int l = 0, r = i;
+        FOR(j, i, a[n]) {
+            if (pre[r] >= l)
+                chkmin(rb, r - pre[r]);
+            l += 2 * j + 1;
+            if (suf[r + 1] < l)
+                chkmax(lb, l - suf[r + 1]);
+            r += 2 * j + 2;
+            if (l > a[n] - a[1]) break;
         }
-        cout << ans << endl;
+        if (lb <= rb) {
+            cout << i * i + lb - a[1] << endl;
+            return 0;
+        }
     }
     return 0;
 }
 
 } // namespace YangTY
 
-int main() {
+signed main() {
     YangTY::main();
     return 0;
 }

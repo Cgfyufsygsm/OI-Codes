@@ -1,8 +1,11 @@
 #include <bits/stdc++.h>
+#include <fastio.hpp>
 #define il inline
 #define FOR(i, a, b) for (int i = (a); i <= (b); ++i)
 #define DEC(i, a, b) for (int i = (a); i >= (b); --i)
 #define debug(...) fprintf(stderr, __VA_ARGS__)
+#define fileIn(s) freopen(s, "r", stdin);
+#define fileOut(s) freopen(s, "w", stdout);
 
 using namespace std;
 
@@ -27,33 +30,51 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+using fastIO::is;
+using fastIO::os;
+using ll = long long;
 const int maxn = 2e5 + 5;
-char s[maxn];
-int n, sum[2][maxn];
+int n, a[maxn];
+ll m;
+using pll = pair<ll, ll>;
 
-bool check(int mid) {
-    int l = 1, r = 0, l0 = 0, r1 = sum[1][n];
-    for (; r <= n; ++r, s[r] == '1' ? --r1 : ++l0) {
-        if (max(l0, r1) <= mid) return 1;
-        while (l <= r && l0 > mid) ++l, s[l - 1] == '1' ? ++r1 : --l0;
+il ll f(ll x, ll k) {
+    return (x % (k + 1)) * ((x + k) / (k + 1)) * ((x + k) / (k + 1)) + (k + 1 - (x % (k + 1))) * (x / (k + 1)) * (x / (k + 1));
+}
+
+pll calc(ll x, ll d) {
+    ll l = 1, r = x - 1, ret = 0;
+    while (l <= r) {
+        auto mid = (l + r) >> 1;
+        if (f(x, mid - 1) - f(x, mid) >= d)
+            ret = mid, l = mid + 1;
+        else r = mid - 1;
     }
-    return 0;
+    return {f(x, ret), ret};
+}
+
+pll check(ll mid) {
+    pll res;
+    FOR(i, 1, n) {
+        auto now = calc(a[i], mid);
+        res.first += now.first, res.second += now.second;
+    }
+    return res;
 }
 
 int main() {
-    int T; cin >> T;
-    while (T--) {
-        cin >> s + 1;
-        n = strlen(s + 1);
-        FOR(k, 0, 1) FOR(i, 1, n) sum[k][i] = sum[k][i - 1] + (s[i] == k + '0');
-        int l = 0, r = n, ans;
-        while (l < r) {
-            int mid = (l + r) >> 1;
-            if (check(mid)) r = mid, ans = mid;
-            else l = mid + 1;
-        }
-        cout << ans << endl;
+    is >> n;
+    FOR(i, 1, n) is >> a[i];
+    DEC(i, n, 1) a[i] -= a[i - 1];
+    is >> m;
+    ll l = 0, r = 1e18, d;
+    while (l <= r) {
+        ll mid = (l + r) >> 1;
+        if (check(mid).first <= m) l = mid + 1, d = mid;
+        else r = mid - 1;
     }
+    auto res = check(d + 1);
+    cout << res.second + (res.first - m + d - 1) / d;
     return 0;
 }
 
