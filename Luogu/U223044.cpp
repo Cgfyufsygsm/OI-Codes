@@ -32,7 +32,41 @@ template<typename T> il void myswap(T &a, T &b) {
     return;
 }
 
+const int maxn = 32768 | 5, mod = 999292927;
+using ll = long long;
+struct Edge {
+    int u, v; ll w;
+} e[maxn];
+int n, m, fa[maxn], col[maxn];
+
+int find(int x) {return x == fa[x] ? x : fa[x] = find(fa[x]);}
+
 int main() {
+    cin >> n >> m;
+    if (m < n - 1) return puts("ERROR"), 0;
+    FOR(i, 1, n) fa[i] = i;
+    int tot = n;
+    FOR(i, 1, m) {
+        cin >> e[i].u >> e[i].v >> e[i].w;
+        int x = find(e[i].u), y = find(e[i].v);
+        if (x != y) fa[x] = y, --tot;
+    }
+    sort(e + 1, e + m + 1, [](const Edge &a, const Edge &b) {return a.w < b.w;});
+    int cnt = 0;
+    FOR(i, 1, n) if (find(i) == i) {
+        col[i] = ++cnt;
+    }
+    FOR(i, 1, n) col[i] = col[find(i)];
+    FOR(i, 1, n) fa[i] = i;
+    multiset<int> S;
+    ll ans = 0;
+    FOR(i, 1, m) {
+        int x = find(e[i].u), y = find(e[i].v);
+        if (x == y) S.insert(e[i].w);
+        else ans += e[i].w, fa[x] = y;
+    }
+    FOR(i, 1, tot - 1) ans += *S.begin(), S.erase(S.begin());
+    cout << tot - 1 << ' ' << m - n + 1 << ' ' << (ans % mod + mod) % mod << endl;
     return 0;
 }
 
