@@ -32,15 +32,15 @@ ll tmp, ans[maxn];
 
 struct node {
     int l, r, id;
-    il bool operator<(const node &b) const {return (l / block) ^ (b.l / block) ? l < b.l : r < b.r;}
+    il bool operator<(const node &b) const {return (l / block) ^ (b.l / block) ? l < b.l : ((l / block) & 1) ? r < b.r : r > b.r;}
 } q[maxn];
 
-void add(int x) {
+il void add(int x) {
     tmp += 2ll * cnt[a[x]]++ + 1;
     return;
 }
 
-void del(int x) {
+il void del(int x) {
     tmp += 1 - 2ll * cnt[a[x]]--;
     return;
 }
@@ -49,7 +49,7 @@ int main() {
     n = read(), m = read(), k = read();
     FOR(i, 1, n) a[i] = read();
     FOR(i, 1, m) q[i].l = read(), q[i].r = read(), q[i].id = i;
-    block = sqrt(n);
+    block = n / sqrt(m * 2 / 3);
     std::sort(q + 1, q + m + 1);
     int l = 1, r = 0;
     FOR(i, 1, m) {
