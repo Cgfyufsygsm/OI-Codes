@@ -8,24 +8,19 @@ const int maxn = 3e5 + 5;
 char s[maxn];
 int n;
 
-int main()
-{
-    //freopen("CF1504A.out", "w", stdout);
+int main() {
     int T;
     scanf("%d", &T);
-    while (T--)
-    {
+    while (T--) {
         scanf("%s", s + 1);
         n = strlen(s + 1);
         int flag = 0;
         FOR(i, 1, n)
-            if (s[i] != 'a')
-            {
+            if (s[i] != 'a') {
                 flag = i;
                 break;
             }
-        if (flag)
-        {
+        if (flag) {
             YES;
             flag = n - flag + 2;
             FOR(i, 1, flag - 1)
