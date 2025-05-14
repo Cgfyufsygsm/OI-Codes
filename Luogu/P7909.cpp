@@ -54,6 +54,9 @@ int n, l, r;
 int main() {
     read(n), read(l), read(r);
     if (r - l + 1 >= n) print(n - 1, '\n');
-    else print(max(l % n, r % n));
+    else {
+      if (l % n > r % n) print(n - 1, '\n');
+      else print(r % n, '\n');
+    }
     return output(), 0;
 }
